@@ -49,12 +49,14 @@ pub enum ParticleTypes {
     Sand,
     Water,
     Stone,
+    Steam,
 }
 
 // Peach
 pub const SAND_COLOR: Color = Color::hsl(23.0, 0.92, 0.75);
 pub const ROCK_COLOR: Color = Color::hsl(232.0, 0.11, 0.47);
 pub const WATER_COLOR: Color = Color::hsl(217.0, 0.92, 0.76);
+pub const STEAM_COLOR: Color = Color::hsl(226.0, 0.64, 0.88);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
@@ -75,6 +77,14 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
             color: add_color_variation(ROCK_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
+            use_gravity: true,
+            ..default()
+        },
+        ParticleTypes::Steam => Particle {
+            // Todo: add health
+            color: add_color_variation(STEAM_COLOR, 0.),
+            movement_type: MovementType::Gas,
+            density: Density(0),
             use_gravity: true,
             ..default()
         },

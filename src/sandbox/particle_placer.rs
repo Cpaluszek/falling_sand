@@ -34,6 +34,7 @@ pub const PANEL_HEIGHT: f32 = 24.;
 pub const SAND_COL: Color32 = Color32::from_rgb(250, 179, 135);
 pub const WATER_COL: Color32 = Color32::from_rgb(137, 180, 250);
 pub const STONE_COL: Color32 = Color32::from_rgb(127, 132, 156);
+pub const STEAM_COL: Color32 = Color32::from_rgb(205, 214, 244);
 
 pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<SelectedParticle>) {
     let ctx = contexts.ctx_mut();
@@ -68,6 +69,15 @@ pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<Selec
                     .clicked()
                 {
                     selected.particle_type = ParticleTypes::Stone;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Steam").color(Color32::BLACK))
+                            .fill(STEAM_COL),
+                    )
+                    .clicked()
+                {
+                    selected.particle_type = ParticleTypes::Steam;
                 }
             });
         });
