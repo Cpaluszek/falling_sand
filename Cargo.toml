@@ -16,6 +16,7 @@ bevy = { version = "0.12.1", default-features = false, features = [
     "x11",
     "dynamic_linking",
 ]}
+bevy_egui = "0.24"
 rand = "0.8.5"
 
 [profile.dev.package."*"]

@@ -68,7 +68,7 @@ pub fn apply_gravity(x: usize, y: usize, sandbox: &mut Sandbox) {
     particle.velocity.zero_out_x();
 }
 
-pub fn get_step_data(x: i32, y: i32, sandbox: &Sandbox) -> StepData {
+fn get_step_data(x: i32, y: i32, sandbox: &Sandbox) -> StepData {
     let particle = sandbox.get(x as usize, y as usize).unwrap();
 
     let rotation_type_amount = match particle.movement_type {

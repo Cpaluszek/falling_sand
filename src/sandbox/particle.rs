@@ -52,6 +52,8 @@ pub enum ParticleTypes {
 
 // Peach
 pub const SAND_COLOR: (u8, u8, u8, u8) = (250, 179, 135, 255);
+pub const WATER_COLOR: (u8, u8, u8, u8) = (137, 180, 250, 255);
+pub const STONE_COLOR: (u8, u8, u8, u8) = (166, 173, 200, 255);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
@@ -62,14 +64,14 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
             ..default()
         },
         ParticleTypes::Water => Particle {
-            color: (123, 153, 200, 255),
+            color: WATER_COLOR, 
             movement_type: MovementType::Liquid,
             density: Density(3),
             use_gravity: true,
             ..default()
         },
         ParticleTypes::Stone => Particle {
-            color: (125, 110, 110, 255),
+            color: STONE_COLOR, 
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
             use_gravity: true,

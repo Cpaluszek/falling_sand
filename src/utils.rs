@@ -42,7 +42,7 @@ pub fn rotate_45_counterclockwise(x: i32, y: i32) -> (i32, i32) {
     }
 }
 
-pub fn rotate_90_clockwise(x: i32, y: i32) -> (i32, i32) {
+pub fn _rotate_90_clockwise(x: i32, y: i32) -> (i32, i32) {
     let vector = Vec2::new(x as f32, y as f32);
     let magnitude = vector.abs().max_element() as i32;
 
@@ -52,7 +52,7 @@ pub fn rotate_90_clockwise(x: i32, y: i32) -> (i32, i32) {
     (vector.1 * magnitude, -vector.0 * magnitude)
 }
 
-pub fn rotate_90_counterclockwise(x: i32, y: i32) -> (i32, i32) {
+pub fn _rotate_90_counterclockwise(x: i32, y: i32) -> (i32, i32) {
     let vector = Vec2::new(x as f32, y as f32);
     let magnitude = vector.abs().max_element() as i32;
 
