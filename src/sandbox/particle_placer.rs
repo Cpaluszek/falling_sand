@@ -30,6 +30,7 @@ impl Plugin for ParticlePlacerPlugin {
     }
 }
 
+// Note: should be a multiple of cell size
 pub const PANEL_HEIGHT: f32 = 24.;
 pub const SAND_COL: Color32 = Color32::from_rgb(250, 179, 135);
 pub const WATER_COL: Color32 = Color32::from_rgb(137, 180, 250);

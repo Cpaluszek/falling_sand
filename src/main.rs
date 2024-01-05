@@ -4,6 +4,8 @@ mod sandbox;
 mod utils;
 use sandbox::SandboxPlugin;
 
+pub const RESOLUTION: (f32, f32) = (1280.0, 720.0);
+
 fn main() {
     App::new()
         .add_plugins(
@@ -11,7 +13,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Bevy Falling Sand".into(),
-                        resolution: (1280., 720.).into(),
+                        resolution: RESOLUTION.into(),
                         present_mode: PresentMode::AutoVsync,
                         ..default()
                     }),
@@ -30,8 +32,8 @@ fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle {
         projection: OrthographicProjection {
             scaling_mode: ScalingMode::Fixed {
-                width: 1920.0,
-                height: 1080.0,
+                width: RESOLUTION.0,
+                height: RESOLUTION.1,
             },
             near: -1000.0,
             ..default()

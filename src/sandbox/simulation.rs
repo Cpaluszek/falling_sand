@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use super::{movement::tick_movement, sandbox::*};
+use super::{movement::tick_movement, particle::get_particle, sandbox::*};
 
 pub fn update_particles(mut sandbox_query: Query<&mut Sandbox>) {
     let mut sandbox = sandbox_query
@@ -26,5 +26,27 @@ pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
         None => return,
     }
 
+    if tick_life(x, y, sandbox) {
+        return;
+    }
+
     tick_movement(x, y, sandbox);
+}
+
+pub fn tick_life(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
+    let replacement = match sandbox.get(x, y).unwrap().particle_death {
+        Some(new_p) => new_p.replace_on_death,
+        None => return false,
+    };
+
+    let health = &mut sandbox.get_mut(x, y).unwrap().health;
+    health.amount -= 1;
+
+    if health.amount <= 0 {
+        let replacement = replacement.map(get_particle);
+        sandbox.set(x, y, replacement);
+        return true;
+    }
+
+    false
 }

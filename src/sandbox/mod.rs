@@ -4,6 +4,8 @@ use bevy::time::common_conditions::on_timer;
 use std::f32::consts::PI;
 use std::time::Duration;
 
+use crate::RESOLUTION;
+
 use self::particle_placer::{ParticlePlacerPlugin, PANEL_HEIGHT};
 use self::render::render_particles;
 use self::sandbox::Sandbox;
@@ -17,12 +19,16 @@ mod sandbox;
 mod simulation;
 
 pub const CELL_SIZE: f32 = 8.0;
-pub const SANDBOX_SIZE: (f32, f32) = (1920. / CELL_SIZE, (1080. - PANEL_HEIGHT) / CELL_SIZE);
+pub const SANDBOX_SIZE: (f32, f32) = (
+    RESOLUTION.0 / CELL_SIZE,
+    (RESOLUTION.1 - PANEL_HEIGHT) / CELL_SIZE,
+);
 
 pub struct SandboxPlugin;
 
 impl Plugin for SandboxPlugin {
     fn build(&self, app: &mut App) {
+        info!("Sandbox size {0} {1}", SANDBOX_SIZE.0, SANDBOX_SIZE.1);
         app.add_plugins(ParticlePlacerPlugin)
             .add_systems(Startup, spawn_sandbox)
             .add_systems(
@@ -58,7 +64,7 @@ pub fn spawn_sandbox(mut commands: Commands, mut images: ResMut<Assets<Image>>) 
         .insert(SpriteBundle {
             texture: image_handle,
             transform: Transform {
-                translation: Vec3::new(0.0, PANEL_HEIGHT, 1.0),
+                translation: Vec3::new(0.0, PANEL_HEIGHT * 0.5, 1.0),
                 scale: Vec3::new(CELL_SIZE, CELL_SIZE, 1.0),
                 rotation: Quat::from_euler(EulerRot::XYZ, 0.0, PI, PI),
             },
