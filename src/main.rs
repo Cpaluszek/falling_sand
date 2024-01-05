@@ -1,5 +1,9 @@
 use bevy::{prelude::*, render::camera::ScalingMode, window::PresentMode};
 
+mod sandbox;
+mod utils;
+use sandbox::SandboxPlugin;
+
 fn main() {
     App::new()
         .add_plugins(
@@ -18,13 +22,17 @@ fn main() {
         .insert_resource(Msaa::Off)
         .add_systems(Startup, spawn_camera)
         .add_systems(Update, bevy::window::close_on_esc)
+        .add_plugins(SandboxPlugin)
         .run();
 }
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle {
         projection: OrthographicProjection {
-            scaling_mode: ScalingMode::Fixed { width: 1920.0, height: 1080.0 },
+            scaling_mode: ScalingMode::Fixed {
+                width: 1920.0,
+                height: 1080.0,
+            },
             near: -1000.0,
             ..default()
         },
