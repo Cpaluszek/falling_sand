@@ -1,4 +1,5 @@
-use bevy::utils::default;
+use bevy::{render::color::Color, utils::default};
+use rand::*;
 use std::cmp::Ordering;
 
 #[derive(Clone, Copy, Default)]
@@ -51,31 +52,45 @@ pub enum ParticleTypes {
 }
 
 // Peach
-pub const SAND_COLOR: (u8, u8, u8, u8) = (250, 179, 135, 255);
-pub const WATER_COLOR: (u8, u8, u8, u8) = (137, 180, 250, 255);
-pub const STONE_COLOR: (u8, u8, u8, u8) = (166, 173, 200, 255);
+pub const SAND_COLOR: Color = Color::hsl(23.0, 0.92, 0.75);
+pub const ROCK_COLOR: Color = Color::hsl(232.0, 0.11, 0.47);
+pub const WATER_COLOR: Color = Color::hsl(217.0, 0.92, 0.76);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
         ParticleTypes::Sand => Particle {
-            color: SAND_COLOR,
+            color: add_color_variation(SAND_COLOR, 0.04),
             density: Density(u32::MAX),
             use_gravity: true,
             ..default()
         },
         ParticleTypes::Water => Particle {
-            color: WATER_COLOR, 
+            color: add_color_variation(WATER_COLOR, 0.),
             movement_type: MovementType::Liquid,
             density: Density(3),
             use_gravity: true,
             ..default()
         },
         ParticleTypes::Stone => Particle {
-            color: STONE_COLOR, 
+            color: add_color_variation(ROCK_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
             use_gravity: true,
             ..default()
         },
     }
+}
+
+fn add_color_variation(color: Color, range: f32) -> (u8, u8, u8, u8) {
+    let mut c: Color = color;
+    if range != 0.0 {
+        let mut rng = rand::thread_rng();
+        c.set_l(c.l() + rng.gen_range(-0.04..=0.04));
+    }
+    (
+        (c.r() * 255.0) as u8,
+        (c.g() * 255.) as u8,
+        (c.b() * 255.) as u8,
+        (c.a() * 255.) as u8,
+    )
 }

@@ -1,8 +1,11 @@
 use bevy::prelude::*;
-use bevy_egui::{egui::{self, Color32, RichText}, EguiContexts, EguiPlugin};
+use bevy_egui::{
+    egui::{self, Color32, RichText},
+    EguiContexts, EguiPlugin,
+};
 
 use super::{
-    particle::{get_particle, ParticleTypes, SAND_COLOR, WATER_COLOR, STONE_COLOR},
+    particle::{get_particle, ParticleTypes},
     sandbox::Sandbox,
     CELL_SIZE,
 };
@@ -27,26 +30,43 @@ impl Plugin for ParticlePlacerPlugin {
     }
 }
 
-
 pub const PANEL_HEIGHT: f32 = 24.;
-pub const SAND_BTN_COLOR: Color32 = Color32::from_rgb(SAND_COLOR.0, SAND_COLOR.1, SAND_COLOR.2);
-pub const WATER_BTN_COLOR: Color32 = Color32::from_rgb(WATER_COLOR.0, WATER_COLOR.1, WATER_COLOR.2);
-pub const STONE_BTN_COLOR: Color32 = Color32::from_rgb(STONE_COLOR.0, STONE_COLOR.1, STONE_COLOR.2);
-
+pub const SAND_COL: Color32 = Color32::from_rgb(250, 179, 135);
+pub const WATER_COL: Color32 = Color32::from_rgb(137, 180, 250);
+pub const STONE_COL: Color32 = Color32::from_rgb(127, 132, 156);
 
 pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<SelectedParticle>) {
     let ctx = contexts.ctx_mut();
-    egui::TopBottomPanel::bottom("bottom_panel").exact_height(PANEL_HEIGHT)
+    egui::TopBottomPanel::bottom("bottom_panel")
+        .exact_height(PANEL_HEIGHT)
         .show(ctx, |ui| {
             ui.add_space(2.0);
             ui.horizontal(|ui| {
-                if ui.add(egui::Button::new(RichText::from("Sand").color(Color32::BLACK)).fill(SAND_BTN_COLOR)).clicked() {
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Sand").color(Color32::BLACK))
+                            .fill(SAND_COL),
+                    )
+                    .clicked()
+                {
                     selected.particle_type = ParticleTypes::Sand;
                 }
-                if ui.add(egui::Button::new(RichText::from("Water").color(Color32::BLACK)).fill(WATER_BTN_COLOR)).clicked() {
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Water").color(Color32::BLACK))
+                            .fill(WATER_COL),
+                    )
+                    .clicked()
+                {
                     selected.particle_type = ParticleTypes::Water;
                 }
-                if ui.add(egui::Button::new(RichText::from("Stone").color(Color32::BLACK)).fill(STONE_BTN_COLOR)).clicked() {
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Stone").color(Color32::BLACK))
+                            .fill(STONE_COL),
+                    )
+                    .clicked()
+                {
                     selected.particle_type = ParticleTypes::Stone;
                 }
             });
@@ -58,22 +78,25 @@ pub fn place_particles(
     window_query: Query<&Window>,
     camera_query: Query<(&Camera, &GlobalTransform)>,
     mouse_button_input: Res<Input<MouseButton>>,
-    selected: Res<SelectedParticle>
+    selected: Res<SelectedParticle>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window: &Window = window_query.get_single().unwrap();
     let mut sandbox = sandbox_query.single_mut();
-
-    // Select particle type
 
     if let Some(world_pos) = window
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
         .map(|ray| ray.origin.truncate())
     {
-        let cx = ((world_pos.x / CELL_SIZE) + (sandbox.width() / 2) as f32) as usize;
-        let cy = (((world_pos.y - PANEL_HEIGHT) / CELL_SIZE) + (sandbox.height() / 2) as f32) as usize;
+        let y_treshold: f32 = -((CELL_SIZE * sandbox.height() as f32) / 2.) + PANEL_HEIGHT;
+        if world_pos.y < y_treshold {
+            return;
+        }
 
+        let cx = ((world_pos.x / CELL_SIZE) + (sandbox.width() / 2) as f32) as usize;
+        let cy =
+            (((world_pos.y - PANEL_HEIGHT) / CELL_SIZE) + (sandbox.height() / 2) as f32) as usize;
         if sandbox.out_of_bounds_usize(cx, cy) {
             return;
         }
@@ -91,7 +114,8 @@ pub fn place_particles(
                         return;
                     }
 
-                    if mouse_button_input.pressed(MouseButton::Left) && sandbox.checked_get(x, y).is_none()
+                    if mouse_button_input.pressed(MouseButton::Left)
+                        && sandbox.checked_get(x, y).is_none()
                     {
                         sandbox.set(x, y, Some(get_particle(selected.particle_type)));
                     } else if mouse_button_input.pressed(MouseButton::Right)
