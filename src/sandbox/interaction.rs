@@ -18,9 +18,9 @@ pub struct SelectedParticle {
     particle_type: ParticleTypes,
 }
 
-pub struct ParticlePlacerPlugin;
+pub struct InterationPlugin;
 
-impl Plugin for ParticlePlacerPlugin {
+impl Plugin for InterationPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(EguiPlugin)
             .insert_resource(SelectedParticle {

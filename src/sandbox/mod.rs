@@ -6,14 +6,14 @@ use std::time::Duration;
 
 use crate::RESOLUTION;
 
-use self::particle_placer::{ParticlePlacerPlugin, PANEL_HEIGHT};
+use self::interaction::{InterationPlugin, PANEL_HEIGHT};
 use self::render::render_particles;
 use self::sandbox::Sandbox;
 use self::simulation::update_particles;
 
 mod movement;
 pub mod particle;
-mod particle_placer;
+mod interaction;
 mod render;
 mod sandbox;
 mod simulation;
@@ -29,7 +29,7 @@ pub struct SandboxPlugin;
 impl Plugin for SandboxPlugin {
     fn build(&self, app: &mut App) {
         info!("Sandbox size {0} {1}", SANDBOX_SIZE.0, SANDBOX_SIZE.1);
-        app.add_plugins(ParticlePlacerPlugin)
+        app.add_plugins(InterationPlugin)
             .add_systems(Startup, spawn_sandbox)
             .add_systems(
                 Update,
