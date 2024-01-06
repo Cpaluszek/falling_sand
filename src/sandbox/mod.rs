@@ -11,9 +11,9 @@ use self::render::render_particles;
 use self::sandbox::Sandbox;
 use self::simulation::update_particles;
 
+mod interaction;
 mod movement;
 pub mod particle;
-mod interaction;
 mod render;
 mod sandbox;
 mod simulation;

@@ -70,6 +70,7 @@ impl Default for ParticleHealth {
 #[derive(Clone, Copy)]
 pub struct ParticleDeath {
     pub replace_on_death: Option<ParticleTypes>,
+    pub probability: Option<f32>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -81,7 +82,7 @@ pub enum ParticleTypes {
 }
 
 // Peach
-pub const SAND_COLOR: Color = Color::hsl(23.0, 0.92, 0.75);
+pub const SAND_COLOR: Color = Color::hsl(41.0, 0.86, 0.83);
 pub const ROCK_COLOR: Color = Color::hsl(232.0, 0.11, 0.47);
 pub const WATER_COLOR: Color = Color::hsl(217.0, 0.92, 0.76);
 pub const STEAM_COLOR: Color = Color::hsl(226.0, 0.64, 0.88);
@@ -118,6 +119,7 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
                 use_gravity: true,
                 particle_death: Some(ParticleDeath {
                     replace_on_death: Some(ParticleTypes::Water),
+                    probability: Some(0.1),
                 }),
                 ..default()
             }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use super::sandbox::Sandbox;
 
-const BACKGROUND_COLOR: (u8, u8, u8, u8) = (0, 0, 0, 255);
+const BACKGROUND_COLOR: (u8, u8, u8, u8) = (30, 30, 46, 255);
 
 pub fn render_particles(
     mut images: ResMut<Assets<Image>>,

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::{thread_rng, Rng};
 
 use super::{movement::tick_movement, particle::get_particle, sandbox::*};
 
@@ -22,6 +23,10 @@ pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
             if p.updated {
                 return;
             }
+            if p.health.amount <= 0 {
+                sandbox.set(x, y, None);
+                return;
+            }
         }
         None => return,
     }
@@ -34,8 +39,8 @@ pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
 }
 
 pub fn tick_life(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
-    let replacement = match sandbox.get(x, y).unwrap().particle_death {
-        Some(new_p) => new_p.replace_on_death,
+    let (replacement, probability) = match sandbox.get(x, y).unwrap().particle_death {
+        Some(new_p) => (new_p.replace_on_death, new_p.probability.map_or(1., |p| p)),
         None => return false,
     };
 
@@ -43,8 +48,10 @@ pub fn tick_life(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
     health.amount -= 1;
 
     if health.amount <= 0 {
-        let replacement = replacement.map(get_particle);
-        sandbox.set(x, y, replacement);
+        if thread_rng().gen_bool(probability.into()) {
+            let replacement = replacement.map(get_particle);
+            sandbox.set(x, y, replacement);
+        }
         return true;
     }
 
