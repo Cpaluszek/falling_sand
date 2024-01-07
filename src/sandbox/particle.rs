@@ -90,10 +90,10 @@ pub enum ParticleTypes {
 // Endesga palette
 pub const SAND_COLOR: Color = Color::hsl(36.0, 0.99, 0.60);
 pub const STONE_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
-pub const WATER_COLOR: Color = Color::hsl(198.0, 1.00, 0.43);
+pub const WATER_COLOR: Color = Color::hsla(198.0, 1.00, 0.43, 0.7);
 pub const STEAM_COLOR: Color = Color::hsl(217.0, 0.21, 0.63);
 pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
-pub const ACID_COLOR: Color = Color::hsl(109.0, 0.52, 0.54);
+pub const ACID_COLOR: Color = Color::hsla(109.0, 0.52, 0.54, 0.7);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
