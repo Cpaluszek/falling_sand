@@ -9,6 +9,7 @@ pub struct Particle {
     pub density: Density,
     pub color: (u8, u8, u8, u8),
     pub movement_type: MovementType,
+    pub spread_rate: Option<i32>,
     pub updated: bool,
     pub use_gravity: bool,
     pub particle_death: Option<ParticleDeath>,
@@ -96,17 +97,19 @@ pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
 pub const ACID_COLOR: Color = Color::hsla(109.0, 0.52, 0.54, 0.7);
 
 pub fn get_particle(material: Material) -> Particle {
-    match material {
+    let mut particle = match material {
         Material::Sand => Particle {
             color: format_and_variate_color(SAND_COLOR, 0.04),
             density: Density(u32::MAX),
             use_gravity: true,
+            velocity: Velocity::new(4, 0),
             ..default()
         },
         Material::Water => Particle {
             health: ParticleHealth::new(1, false),
             color: format_and_variate_color(WATER_COLOR, 0.),
             movement_type: MovementType::Liquid,
+            spread_rate: Some(2),
             density: Density(1),
             use_gravity: true,
             ..default()
@@ -147,12 +150,18 @@ pub fn get_particle(material: Material) -> Particle {
             health: ParticleHealth::new(50, false),
             color: format_and_variate_color(ACID_COLOR, 0.0),
             movement_type: MovementType::Liquid,
+            spread_rate: Some(1),
             density: Density(2),
             acidity: Some(Acidity(5)),
             use_gravity: true,
             ..default()
         },
-    }
+    };
+
+    // Particle spread on spawm
+    let random_velocity_x = thread_rng().gen_range(-3..=3);
+    particle.velocity = Velocity::new(random_velocity_x, -2);
+    particle
 }
 
 fn format_and_variate_color(color: Color, range: f32) -> (u8, u8, u8, u8) {

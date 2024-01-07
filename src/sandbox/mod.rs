@@ -18,7 +18,7 @@ mod render;
 mod sandbox;
 mod simulation;
 
-pub const CELL_SIZE: f32 = 8.0;
+pub const CELL_SIZE: f32 = 4.0;
 pub const SANDBOX_SIZE: (f32, f32) = (
     RESOLUTION.0 / CELL_SIZE,
     (RESOLUTION.1 - PANEL_HEIGHT) / CELL_SIZE,
@@ -35,7 +35,7 @@ impl Plugin for SandboxPlugin {
                 Update,
                 (update_particles, render_particles)
                     .chain()
-                    .distributive_run_if(on_timer(Duration::from_secs_f32(1. / 24.))),
+                    .distributive_run_if(on_timer(Duration::from_secs_f32(1. / 60.))),
             );
     }
 }

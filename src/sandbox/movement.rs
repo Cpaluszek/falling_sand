@@ -78,9 +78,9 @@ fn get_step_data(x: i32, y: i32, sandbox: &Sandbox) -> StepData {
     };
 
     let valid_rotations = movement_rotations.iter().take(rotation_type_amount);
+    let spread_rate = particle.spread_rate.map_or(0, |p| p);
     for &i in valid_rotations {
-        let mut step_data =
-            line_with_rotation(x, y, particle.velocity.x, particle.velocity.y, sandbox, i);
+        let mut step_data = line_with_rotation(x, y, particle.velocity.x, particle.velocity.y, spread_rate, sandbox, i);
 
         if step_data.moved {
             return step_data;
@@ -102,15 +102,34 @@ fn line_with_rotation(
     start_y: i32,
     w: i32,
     h: i32,
+    spread_rate: i32,
     matrix: &Sandbox,
     rotate_type: u32,
 ) -> StepData {
     let velocity = match rotate_type {
-        0 => (w, h),
-        1 => rotate_45_clockwise(w, h),
-        2 => rotate_45_counterclockwise(w, h),
-        3 => rotate_90_clockwise_normalized(w, h),
-        4 => rotate_90_counterclockwise_normalized(w, h),
+        0 => (w, h - spread_rate),
+        1 => {
+            let mut v = rotate_45_clockwise(w, h);
+            v.0 -= spread_rate;
+            v.1 -= spread_rate;
+            v
+        },
+        2 => {
+            let mut v = rotate_45_counterclockwise(w, h);
+            v.0 += spread_rate;
+            v.1 -= spread_rate;
+            v
+        },
+        3 => {
+            let mut v = rotate_90_clockwise_normalized(w, h);
+            v.0 -= spread_rate;
+            v
+        },
+        4 =>  {
+            let mut v = rotate_90_counterclockwise_normalized(w, h);
+            v.0 += spread_rate;
+            v
+        },
         _ => panic!("{} is not a rotation type. Should be 0-4.", rotate_type),
     };
 
@@ -122,7 +141,6 @@ fn line_with_rotation(
         matrix,
     )
 }
-
 fn line(mut x1: i32, mut y1: i32, x2: i32, y2: i32, sandbox: &Sandbox) -> StepData {
     if x1 == x2 && y1 == y2 {
         return StepData::default();
@@ -132,10 +150,25 @@ fn line(mut x1: i32, mut y1: i32, x2: i32, y2: i32, sandbox: &Sandbox) -> StepDa
     let h = y2 - y1;
     let dx1 = if w < 0 { -1 } else { 1 };
     let dy1 = if h < 0 { -1 } else { 1 };
-    let dx2 = if w.abs() < h.abs() { 0 } else { dx1 };
-    let dy2 = dy1;
-    let longest = w.abs().max(h.abs());
-    let shortest = w.abs().min(h.abs());
+    let mut dx2 = 0;
+    let mut dy2 = 0;
+    if w < 0 {
+        dx2 = -1;
+    } else if w > 0 {
+        dx2 = 1;
+    }
+    let mut longest = w.abs();
+    let mut shortest = h.abs();
+    if !(longest > shortest) {
+        longest = h.abs();
+        shortest = w.abs();
+        if h < 0 {
+            dy2 = -1;
+        } else if h > 0 {
+            dy2 = 1;
+        }
+        dx2 = 0;
+    }
 
     let mut past_x = x1;
     let mut past_y = y1;
@@ -147,7 +180,7 @@ fn line(mut x1: i32, mut y1: i32, x2: i32, y2: i32, sandbox: &Sandbox) -> StepDa
             return StepData {
                 new_x: past_x,
                 new_y: past_y,
-                moved: i != 1,
+                moved: i > 1,
                 other_particle: entity_at_position.copied(),
                 other_x: x1,
                 other_y: y1,

@@ -13,7 +13,7 @@ use super::{
     CELL_SIZE,
 };
 
-pub const BRUSH_RADIUS: isize = 2;
+pub const BRUSH_RADIUS: isize = 4;
 pub const BRUSH_RADIUS_SQR: isize = BRUSH_RADIUS * BRUSH_RADIUS;
 
 #[derive(Resource)]
