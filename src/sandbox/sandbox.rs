@@ -43,6 +43,14 @@ impl Sandbox {
         self.particles[index].as_mut()
     }
 
+    pub fn checked_get_mut(&mut self, x: usize, y: usize) -> Option<&mut Particle> {
+        if self.out_of_bounds_usize(x, y) {
+            None
+        } else {
+            self.get_mut(x, y)
+        }
+    }
+
     pub fn set(&mut self, x: usize, y: usize, particle: Option<Particle>) {
         let index = self.to_index(x, y);
         if index >= self.particles.len() {

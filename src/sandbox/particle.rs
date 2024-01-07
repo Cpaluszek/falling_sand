@@ -12,6 +12,7 @@ pub struct Particle {
     pub updated: bool,
     pub use_gravity: bool,
     pub particle_death: Option<ParticleDeath>,
+    pub acidity: Option<Acidity>,
 }
 
 #[derive(Clone, Copy, PartialEq, Default)]
@@ -73,6 +74,9 @@ pub struct ParticleDeath {
     pub probability: Option<f32>,
 }
 
+#[derive(Clone, Copy)]
+pub struct Acidity(pub i32);
+
 #[derive(Debug, Clone, Copy)]
 pub enum ParticleTypes {
     Sand,
@@ -80,6 +84,7 @@ pub enum ParticleTypes {
     Stone,
     Steam,
     Wood,
+    Acid,
 }
 
 // Endesga palette
@@ -88,6 +93,7 @@ pub const STONE_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
 pub const WATER_COLOR: Color = Color::hsl(198.0, 1.00, 0.43);
 pub const STEAM_COLOR: Color = Color::hsl(217.0, 0.21, 0.63);
 pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
+pub const ACID_COLOR: Color = Color::hsl(109.0, 0.52, 0.54);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
@@ -98,9 +104,10 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
             ..default()
         },
         ParticleTypes::Water => Particle {
+            health: ParticleHealth::new(1, false),
             color: add_color_variation(WATER_COLOR, 0.),
             movement_type: MovementType::Liquid,
-            density: Density(3),
+            density: Density(1),
             use_gravity: true,
             ..default()
         },
@@ -125,7 +132,7 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
                 }),
                 ..default()
             }
-        },
+        }
         ParticleTypes::Wood => {
             Particle {
                 color: add_color_variation(WOOD_COLOR, 0.04),
@@ -136,6 +143,15 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
                 ..default()
             }
         }
+        ParticleTypes::Acid => Particle {
+            health: ParticleHealth::new(50, false),
+            color: add_color_variation(ACID_COLOR, 0.0),
+            movement_type: MovementType::Liquid,
+            density: Density(2),
+            acidity: Some(Acidity(5)),
+            use_gravity: true,
+            ..default()
+        },
     }
 }
 
