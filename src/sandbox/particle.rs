@@ -79,13 +79,15 @@ pub enum ParticleTypes {
     Water,
     Stone,
     Steam,
+    Wood,
 }
 
-// Peach
-pub const SAND_COLOR: Color = Color::hsl(41.0, 0.86, 0.83);
-pub const ROCK_COLOR: Color = Color::hsl(232.0, 0.11, 0.47);
-pub const WATER_COLOR: Color = Color::hsl(217.0, 0.92, 0.76);
-pub const STEAM_COLOR: Color = Color::hsl(226.0, 0.64, 0.88);
+// Endesga palette
+pub const SAND_COLOR: Color = Color::hsl(36.0, 0.99, 0.60);
+pub const STONE_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
+pub const WATER_COLOR: Color = Color::hsl(198.0, 1.00, 0.43);
+pub const STEAM_COLOR: Color = Color::hsl(217.0, 0.21, 0.63);
+pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
 
 pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     match particle_type {
@@ -103,7 +105,7 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
             ..default()
         },
         ParticleTypes::Stone => Particle {
-            color: add_color_variation(ROCK_COLOR, 0.),
+            color: add_color_variation(STONE_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
             use_gravity: true,
@@ -121,6 +123,16 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
                     replace_on_death: Some(ParticleTypes::Water),
                     probability: Some(0.1),
                 }),
+                ..default()
+            }
+        },
+        ParticleTypes::Wood => {
+            Particle {
+                color: add_color_variation(WOOD_COLOR, 0.04),
+                movement_type: MovementType::Solid,
+                density: Density(u32::MAX),
+                use_gravity: true,
+                // TODO: add burnable
                 ..default()
             }
         }

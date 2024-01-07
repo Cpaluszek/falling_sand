@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, Color32, RichText},
+    egui::{self, Color32, RichText, FontId},
     EguiContexts, EguiPlugin,
 };
 
 use super::{
-    particle::{get_particle, ParticleTypes},
+    particle::{get_particle, ParticleTypes, SAND_COLOR, STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR},
     sandbox::Sandbox,
     CELL_SIZE,
 };
@@ -26,18 +26,30 @@ impl Plugin for InterationPlugin {
             .insert_resource(SelectedParticle {
                 particle_type: ParticleTypes::Sand,
             })
+            .insert_resource(ButtonsColors {
+                sand_color: Color32::from_rgb((SAND_COLOR.r() * 255.0) as u8, (SAND_COLOR.g() * 255.0) as u8, (SAND_COLOR.b() * 255.0) as u8),
+                water_color: Color32::from_rgb((WATER_COLOR.r() * 255.0) as u8, (WATER_COLOR.g() * 255.0) as u8, (WATER_COLOR.b() * 255.0) as u8),
+                stone_color: Color32::from_rgb((STONE_COLOR.r() * 255.0) as u8, (STONE_COLOR.g() * 255.0) as u8, (STONE_COLOR.b() * 255.0) as u8),
+                steam_color: Color32::from_rgb((STEAM_COLOR.r() * 255.0) as u8, (STEAM_COLOR.g() * 255.0) as u8, (STEAM_COLOR.b() * 255.0) as u8),
+                wood_color: Color32::from_rgb((WOOD_COLOR.r() * 255.0) as u8, (WOOD_COLOR.g() * 255.0) as u8, (WOOD_COLOR.b() * 255.0) as u8),
+            })
             .add_systems(Update, (place_particles, select_particle_ui));
     }
 }
 
+#[derive(Resource)]
+pub struct ButtonsColors {
+    sand_color: Color32,
+    water_color: Color32,
+    stone_color: Color32,
+    steam_color: Color32,
+    wood_color: Color32,
+}
+
 // Note: should be a multiple of cell size
 pub const PANEL_HEIGHT: f32 = 24.;
-pub const SAND_COL: Color32 = Color32::from_rgb(249, 226, 175);
-pub const WATER_COL: Color32 = Color32::from_rgb(137, 180, 250);
-pub const STONE_COL: Color32 = Color32::from_rgb(127, 132, 156);
-pub const STEAM_COL: Color32 = Color32::from_rgb(205, 214, 244);
 
-pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<SelectedParticle>) {
+pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<SelectedParticle>, colors: Res<ButtonsColors>) {
     let ctx = contexts.ctx_mut();
     egui::TopBottomPanel::bottom("bottom_panel")
         .exact_height(PANEL_HEIGHT)
@@ -47,7 +59,7 @@ pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<Selec
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Sand").color(Color32::BLACK))
-                            .fill(SAND_COL),
+                            .fill(colors.sand_color)
                     )
                     .clicked()
                 {
@@ -56,7 +68,7 @@ pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<Selec
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Water").color(Color32::BLACK))
-                            .fill(WATER_COL),
+                            .fill(colors.water_color),
                     )
                     .clicked()
                 {
@@ -65,7 +77,7 @@ pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<Selec
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Stone").color(Color32::BLACK))
-                            .fill(STONE_COL),
+                            .fill(colors.stone_color),
                     )
                     .clicked()
                 {
@@ -74,11 +86,20 @@ pub fn select_particle_ui(mut contexts: EguiContexts, mut selected: ResMut<Selec
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Steam").color(Color32::BLACK))
-                            .fill(STEAM_COL),
+                            .fill(colors.steam_color),
                     )
                     .clicked()
                 {
                     selected.particle_type = ParticleTypes::Steam;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Wood").color(Color32::BLACK))
+                            .fill(colors.wood_color),
+                    )
+                    .clicked()
+                {
+                    selected.particle_type = ParticleTypes::Wood;
                 }
             });
         });
