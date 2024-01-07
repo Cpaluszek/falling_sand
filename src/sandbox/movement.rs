@@ -17,7 +17,7 @@ struct StepData {
     swap: bool,
 }
 
-pub fn tick_movement(x: usize, y: usize, sandbox: &mut Sandbox) {
+pub fn step_movement(x: usize, y: usize, sandbox: &mut Sandbox) {
     apply_gravity(x, y, sandbox);
 
     let step_data = get_step_data(x as i32, y as i32, sandbox);

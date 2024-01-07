@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
-use super::{movement::tick_movement, particle::get_particle, sandbox::*};
+use super::{movement::step_movement, particle::get_particle, sandbox::*};
 
 pub fn update_particles(mut sandbox_query: Query<&mut Sandbox>) {
     let mut sandbox = sandbox_query
@@ -19,31 +19,31 @@ pub fn update_particles(mut sandbox_query: Query<&mut Sandbox>) {
 
 pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
     match sandbox.get(x, y) {
-        Some(p) => {
-            if p.updated {
-                return;
-            }
+        Some(p) if p.updated || p.health.amount <= 0 => {
             if p.health.amount <= 0 {
                 sandbox.set(x, y, None);
-                return;
             }
+            return;
         }
         None => return,
+        _ => {}
     }
 
-    if tick_acidity(x, y, sandbox) {
-        return;
-    }
-    if tick_life(x, y, sandbox) {
+    if step_acidity(x, y, sandbox) || step_health(x, y, sandbox) {
         return;
     }
 
-    tick_movement(x, y, sandbox);
+    step_movement(x, y, sandbox);
 }
 
-pub fn tick_life(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
-    let (replacement, probability) = match sandbox.get(x, y).unwrap().particle_death {
-        Some(new_p) => (new_p.replace_on_death, new_p.probability.map_or(1., |p| p)),
+pub fn step_health(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
+    let particle = match sandbox.get(x, y) {
+        Some(p) => p,
+        None => return false,
+    };
+
+    let (replacement, probability) = match &particle.particle_death {
+        Some(new_p) => (new_p.replace_on_death, new_p.probability.unwrap_or(1.)),
         None => return false,
     };
 
@@ -61,7 +61,7 @@ pub fn tick_life(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
     false
 }
 
-pub fn tick_acidity(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
+pub fn step_acidity(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
     let acidity = match sandbox.get(x, y).unwrap().acidity {
         Some(a) => a.0,
         None => return false,

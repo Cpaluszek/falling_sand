@@ -70,7 +70,7 @@ impl Default for ParticleHealth {
 
 #[derive(Clone, Copy)]
 pub struct ParticleDeath {
-    pub replace_on_death: Option<ParticleTypes>,
+    pub replace_on_death: Option<Material>,
     pub probability: Option<f32>,
 }
 
@@ -78,7 +78,7 @@ pub struct ParticleDeath {
 pub struct Acidity(pub i32);
 
 #[derive(Debug, Clone, Copy)]
-pub enum ParticleTypes {
+pub enum Material {
     Sand,
     Water,
     Stone,
@@ -95,47 +95,47 @@ pub const STEAM_COLOR: Color = Color::hsl(217.0, 0.21, 0.63);
 pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
 pub const ACID_COLOR: Color = Color::hsla(109.0, 0.52, 0.54, 0.7);
 
-pub fn get_particle(particle_type: ParticleTypes) -> Particle {
-    match particle_type {
-        ParticleTypes::Sand => Particle {
-            color: add_color_variation(SAND_COLOR, 0.04),
+pub fn get_particle(material: Material) -> Particle {
+    match material {
+        Material::Sand => Particle {
+            color: format_and_variate_color(SAND_COLOR, 0.04),
             density: Density(u32::MAX),
             use_gravity: true,
             ..default()
         },
-        ParticleTypes::Water => Particle {
+        Material::Water => Particle {
             health: ParticleHealth::new(1, false),
-            color: add_color_variation(WATER_COLOR, 0.),
+            color: format_and_variate_color(WATER_COLOR, 0.),
             movement_type: MovementType::Liquid,
             density: Density(1),
             use_gravity: true,
             ..default()
         },
-        ParticleTypes::Stone => Particle {
-            color: add_color_variation(STONE_COLOR, 0.),
+        Material::Stone => Particle {
+            color: format_and_variate_color(STONE_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
             use_gravity: true,
             ..default()
         },
-        ParticleTypes::Steam => {
+        Material::Steam => {
             let health = thread_rng().gen_range(100..120);
             Particle {
                 health: ParticleHealth::new(health, false),
-                color: add_color_variation(STEAM_COLOR, 0.),
+                color: format_and_variate_color(STEAM_COLOR, 0.),
                 movement_type: MovementType::Gas,
                 density: Density(0),
                 use_gravity: true,
                 particle_death: Some(ParticleDeath {
-                    replace_on_death: Some(ParticleTypes::Water),
+                    replace_on_death: Some(Material::Water),
                     probability: Some(0.1),
                 }),
                 ..default()
             }
         }
-        ParticleTypes::Wood => {
+        Material::Wood => {
             Particle {
-                color: add_color_variation(WOOD_COLOR, 0.04),
+                color: format_and_variate_color(WOOD_COLOR, 0.04),
                 movement_type: MovementType::Solid,
                 density: Density(u32::MAX),
                 use_gravity: true,
@@ -143,9 +143,9 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
                 ..default()
             }
         }
-        ParticleTypes::Acid => Particle {
+        Material::Acid => Particle {
             health: ParticleHealth::new(50, false),
-            color: add_color_variation(ACID_COLOR, 0.0),
+            color: format_and_variate_color(ACID_COLOR, 0.0),
             movement_type: MovementType::Liquid,
             density: Density(2),
             acidity: Some(Acidity(5)),
@@ -155,7 +155,7 @@ pub fn get_particle(particle_type: ParticleTypes) -> Particle {
     }
 }
 
-fn add_color_variation(color: Color, range: f32) -> (u8, u8, u8, u8) {
+fn format_and_variate_color(color: Color, range: f32) -> (u8, u8, u8, u8) {
     let mut c: Color = color;
     if range != 0.0 {
         let mut rng = rand::thread_rng();
@@ -163,8 +163,8 @@ fn add_color_variation(color: Color, range: f32) -> (u8, u8, u8, u8) {
     }
     (
         (c.r() * 255.0) as u8,
-        (c.g() * 255.) as u8,
-        (c.b() * 255.) as u8,
-        (c.a() * 255.) as u8,
+        (c.g() * 255.0) as u8,
+        (c.b() * 255.0) as u8,
+        (c.a() * 255.0) as u8,
     )
 }

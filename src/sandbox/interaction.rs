@@ -6,7 +6,7 @@ use bevy_egui::{
 
 use super::{
     particle::{
-        get_particle, ParticleTypes, ACID_COLOR, SAND_COLOR, STEAM_COLOR, STONE_COLOR, WATER_COLOR,
+        get_particle, Material, ACID_COLOR, SAND_COLOR, STEAM_COLOR, STONE_COLOR, WATER_COLOR,
         WOOD_COLOR,
     },
     sandbox::Sandbox,
@@ -18,7 +18,7 @@ pub const BRUSH_RADIUS_SQR: isize = BRUSH_RADIUS * BRUSH_RADIUS;
 
 #[derive(Resource)]
 pub struct SelectedParticle {
-    particle_type: ParticleTypes,
+    material: Material,
 }
 
 pub struct InterationPlugin;
@@ -27,35 +27,35 @@ impl Plugin for InterationPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(EguiPlugin)
             .insert_resource(SelectedParticle {
-                particle_type: ParticleTypes::Sand,
+                material: Material::Sand,
             })
             .insert_resource(ButtonsColors {
-                sand_color: Color32::from_rgb(
+                sand: Color32::from_rgb(
                     (SAND_COLOR.r() * 255.0) as u8,
                     (SAND_COLOR.g() * 255.0) as u8,
                     (SAND_COLOR.b() * 255.0) as u8,
                 ),
-                water_color: Color32::from_rgb(
+                water: Color32::from_rgb(
                     (WATER_COLOR.r() * 255.0) as u8,
                     (WATER_COLOR.g() * 255.0) as u8,
                     (WATER_COLOR.b() * 255.0) as u8,
                 ),
-                stone_color: Color32::from_rgb(
+                stone: Color32::from_rgb(
                     (STONE_COLOR.r() * 255.0) as u8,
                     (STONE_COLOR.g() * 255.0) as u8,
                     (STONE_COLOR.b() * 255.0) as u8,
                 ),
-                steam_color: Color32::from_rgb(
+                steam: Color32::from_rgb(
                     (STEAM_COLOR.r() * 255.0) as u8,
                     (STEAM_COLOR.g() * 255.0) as u8,
                     (STEAM_COLOR.b() * 255.0) as u8,
                 ),
-                wood_color: Color32::from_rgb(
+                wood: Color32::from_rgb(
                     (WOOD_COLOR.r() * 255.0) as u8,
                     (WOOD_COLOR.g() * 255.0) as u8,
                     (WOOD_COLOR.b() * 255.0) as u8,
                 ),
-                acid_color: Color32::from_rgb(
+                acid: Color32::from_rgb(
                     (ACID_COLOR.r() * 255.0) as u8,
                     (ACID_COLOR.g() * 255.0) as u8,
                     (ACID_COLOR.b() * 255.0) as u8,
@@ -67,16 +67,16 @@ impl Plugin for InterationPlugin {
 
 #[derive(Resource)]
 pub struct ButtonsColors {
-    sand_color: Color32,
-    water_color: Color32,
-    stone_color: Color32,
-    steam_color: Color32,
-    wood_color: Color32,
-    acid_color: Color32,
+    sand: Color32,
+    water: Color32,
+    stone: Color32,
+    steam: Color32,
+    wood: Color32,
+    acid: Color32,
 }
 
-// Note: should be a multiple of cell size
-pub const PANEL_HEIGHT: f32 = 24.;
+// should be a multiple of cell size
+pub const PANEL_HEIGHT: f32 = 24.0;
 
 pub fn select_particle_ui(
     mut contexts: EguiContexts,
@@ -92,56 +92,56 @@ pub fn select_particle_ui(
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Sand").color(Color32::BLACK))
-                            .fill(colors.sand_color),
+                            .fill(colors.sand),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Sand;
+                    selected.material = Material::Sand;
                 }
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Water").color(Color32::BLACK))
-                            .fill(colors.water_color),
+                            .fill(colors.water),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Water;
+                    selected.material = Material::Water;
                 }
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Stone").color(Color32::BLACK))
-                            .fill(colors.stone_color),
+                            .fill(colors.stone),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Stone;
+                    selected.material = Material::Stone;
                 }
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Steam").color(Color32::BLACK))
-                            .fill(colors.steam_color),
+                            .fill(colors.steam),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Steam;
+                    selected.material = Material::Steam;
                 }
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Wood").color(Color32::BLACK))
-                            .fill(colors.wood_color),
+                            .fill(colors.wood),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Wood;
+                    selected.material = Material::Wood;
                 }
                 if ui
                     .add(
                         egui::Button::new(RichText::from("Acid").color(Color32::BLACK))
-                            .fill(colors.acid_color),
+                            .fill(colors.acid),
                     )
                     .clicked()
                 {
-                    selected.particle_type = ParticleTypes::Acid;
+                    selected.material = Material::Acid;
                 }
             });
         });
@@ -191,7 +191,7 @@ pub fn place_particles(
                     if mouse_button_input.pressed(MouseButton::Left)
                         && sandbox.checked_get(x, y).is_none()
                     {
-                        sandbox.set(x, y, Some(get_particle(selected.particle_type)));
+                        sandbox.set(x, y, Some(get_particle(selected.material)));
                     } else if mouse_button_input.pressed(MouseButton::Right)
                         && sandbox.get(x, y).is_some()
                     {
