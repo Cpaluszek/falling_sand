@@ -95,7 +95,6 @@ impl ParticleReplacement {
 #[derive(Clone, Copy)]
 pub struct Acidity(pub i32);
 
-// TODO: invert temperature changer logic
 #[derive(Clone, Copy)]
 pub struct Temperature {
     pub current: i32,
@@ -203,7 +202,7 @@ pub fn get_particle(material: Material) -> Particle {
                 Some(ParticleReplacement::new(Some(Material::Steam), 0.8)),
                 0,
             )),
-            temperature_changer: Some(TemperatureChanger(5)),
+            temperature_changer: Some(TemperatureChanger(-5)),
             use_gravity: true,
             ..default()
         },
@@ -244,7 +243,7 @@ pub fn get_particle(material: Material) -> Particle {
                     true,
                     true,
                     false,
-                    Some(ParticleReplacement::new(Some(Material::Ash), 0.5)),
+                    Some(ParticleReplacement::new(Some(Material::Ash), 0.3)),
                     0,
                 )),
                 burnable: Some(Burnable {
@@ -280,7 +279,7 @@ pub fn get_particle(material: Material) -> Particle {
                 Some(ParticleReplacement::new(Some(Material::Igneous), 0.9)),
                 0,
             )),
-            temperature_changer: Some(TemperatureChanger(-5)),
+            temperature_changer: Some(TemperatureChanger(5)),
             use_gravity: true,
             ..default()
         },
@@ -311,7 +310,7 @@ pub fn get_particle(material: Material) -> Particle {
                 color: format_and_variate_color(SPARK_COLORS[rand_index], 0.),
                 movement_type: MovementType::Gas,
                 density: Density(1),
-                temperature_changer: Some(TemperatureChanger(-5)),
+                temperature_changer: Some(TemperatureChanger(5)),
                 use_gravity: true,
                 ..default()
             }

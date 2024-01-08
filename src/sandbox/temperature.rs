@@ -34,20 +34,20 @@ pub fn apply_temperature_to_neighbors(x: usize, y: usize, sandbox: &mut Sandbox)
     ] {
         if let Some(particle) = sandbox.checked_get_mut(neighbor_x, neighbor_y) {
             if let Some(temperature) = &mut particle.temperature {
-                if temp_changer.is_positive() && !temperature.coolable {
+                if temp_changer.is_positive() && !temperature.heatable {
                     continue;
                 }
-                if temp_changer.is_negative() && !temperature.heatable {
+                if temp_changer.is_negative() && !temperature.coolable {
                     continue;
                 }
 
                 match temperature.critical_on_cool {
                     true => {
-                        temperature.current = (temperature.current + temp_changer).clamp(1, 100)
+                        temperature.current = (temperature.current + temp_changer).clamp(0, 100)
                     }
                     false => {
                         temperature.current = (temperature.current + temp_changer)
-                            .clamp(0, temperature.start_temperature)
+                            .clamp(temperature.start_temperature, 100)
                     }
                 }
             }
@@ -63,8 +63,8 @@ fn step_self(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
 
     let health = &mut sandbox.get_mut(x, y).unwrap().health;
 
-    if (!temperature.critical_on_cool && temperature.current <= 0)
-        || (temperature.critical_on_cool && temperature.current >= 100)
+    if (temperature.critical_on_cool && temperature.current <= 0)
+        || (!temperature.critical_on_cool && temperature.current >= 100)
     {
         if temperature.explosion_radius > 0 {
             explode(x, y, temperature.explosion_radius, sandbox);
@@ -126,12 +126,12 @@ fn try_ignite_burnable(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
     if let Some(burnable) = &mut particle.burnable {
-        if burnable.burning || particle.temperature.unwrap().current > 0 {
+        if burnable.burning || particle.temperature.unwrap().current < 100 {
             return;
         }
 
         burnable.burning = true;
-        particle.temperature_changer = Some(TemperatureChanger(-1));
+        particle.temperature_changer = Some(TemperatureChanger(2));
         particle.health.amount = burnable.burn_ticks;
         particle.color = burnable.burn_color;
     }
@@ -141,7 +141,7 @@ fn try_extenquish_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
     if let Some(burnable) = &mut particle.burnable {
-        if !burnable.burning || particle.temperature.unwrap().current <= 0 {
+        if !burnable.burning || particle.temperature.unwrap().current > 0 {
             return;
         }
 
