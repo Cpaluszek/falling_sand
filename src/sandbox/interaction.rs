@@ -6,7 +6,7 @@ use bevy_egui::{
 
 use super::{
     particle::{
-        get_particle, Material, ACID_COLOR, LAVA_COLOR, SAND_COLOR, SMOKE_COLOR, SPARK_COLOR,
+        get_particle, Material, ACID_COLOR, LAVA_COLOR, SAND_COLOR, SMOKE_COLOR, SPARK_COLORS,
         STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
     },
     sandbox::Sandbox,
@@ -71,9 +71,9 @@ impl Plugin for InterationPlugin {
                     (SMOKE_COLOR.b() * 255.0) as u8,
                 ),
                 spark: Color32::from_rgb(
-                    (SPARK_COLOR.r() * 255.0) as u8,
-                    (SPARK_COLOR.g() * 255.0) as u8,
-                    (SPARK_COLOR.b() * 255.0) as u8,
+                    (SPARK_COLORS[0].r() * 255.0) as u8,
+                    (SPARK_COLORS[0].g() * 255.0) as u8,
+                    (SPARK_COLORS[0].b() * 255.0) as u8,
                 ),
             })
             .add_systems(Update, (place_particles, select_particle_ui));
