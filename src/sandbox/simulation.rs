@@ -45,8 +45,8 @@ pub fn step_health(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         None => return false,
     };
 
-    let (replacement, probability) = match &particle.particle_death {
-        Some(new_p) => (new_p.replace_on_death, new_p.probability.unwrap_or(1.)),
+    let (replacement, probability) = match &particle.health.replacement {
+        Some(new_p) => (new_p.material, new_p.probability),
         None => return false,
     };
 
@@ -60,7 +60,6 @@ pub fn step_health(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         }
         return true;
     }
-
     false
 }
 

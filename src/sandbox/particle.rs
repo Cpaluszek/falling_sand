@@ -12,7 +12,6 @@ pub struct Particle {
     pub spread_rate: Option<i32>,
     pub updated: bool,
     pub use_gravity: bool,
-    pub particle_death: Option<ParticleDeath>,
     pub acidity: Option<Acidity>,
     pub temperature: Option<Temperature>,
     pub temperature_changer: Option<TemperatureChanger>,
@@ -55,11 +54,16 @@ pub struct Density(pub u32);
 pub struct ParticleHealth {
     pub amount: i32,
     pub corrodable: bool,
+    pub replacement: Option<ParticleReplacement>,
 }
 
 impl ParticleHealth {
-    fn new(amount: i32, corrodable: bool) -> Self {
-        Self { amount, corrodable }
+    fn new(amount: i32, corrodable: bool, replacement: Option<ParticleReplacement>) -> Self {
+        Self {
+            amount,
+            corrodable,
+            replacement,
+        }
     }
 }
 
@@ -68,33 +72,30 @@ impl Default for ParticleHealth {
         Self {
             amount: 50,
             corrodable: true,
+            replacement: None,
         }
     }
 }
 
 #[derive(Clone, Copy)]
-pub struct ParticleDeath {
-    pub replace_on_death: Option<Material>,
-    pub probability: Option<f32>,
+pub struct ParticleReplacement {
+    pub material: Option<Material>,
+    pub probability: f32,
+}
+
+impl ParticleReplacement {
+    fn new(material: Option<Material>, probability: f32) -> Self {
+        Self {
+            material,
+            probability,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
 pub struct Acidity(pub i32);
 
-#[derive(Debug, Clone, Copy)]
-pub enum Material {
-    Sand,
-    Water,
-    Stone,
-    Steam,
-    Wood,
-    Acid,
-    Lava,
-    Smoke,
-    Spark,
-    Igneous,
-}
-
+// TODO: invert temperature changer logic
 #[derive(Clone, Copy)]
 pub struct Temperature {
     pub current: i32,
@@ -102,7 +103,7 @@ pub struct Temperature {
     pub coolable: bool,
     pub heatable: bool,
     pub critical_on_cool: bool,
-    pub change_on_critical: Option<Material>,
+    pub replacement_on_critical: Option<ParticleReplacement>,
     pub explosion_radius: i32,
 }
 
@@ -112,7 +113,7 @@ impl Temperature {
         coolable: bool,
         heatable: bool,
         critical_on_cool: bool,
-        change_on_critical: Option<Material>,
+        replacement_on_critical: Option<ParticleReplacement>,
         explosion_radius: i32,
     ) -> Self {
         Self {
@@ -121,7 +122,7 @@ impl Temperature {
             coolable,
             heatable,
             critical_on_cool,
-            change_on_critical,
+            replacement_on_critical,
             explosion_radius,
         }
     }
@@ -139,6 +140,21 @@ pub struct Burnable {
     pub burning: bool,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum Material {
+    Sand,
+    Water,
+    Stone,
+    Steam,
+    Wood,
+    Acid,
+    Lava,
+    Smoke,
+    Spark,
+    Igneous,
+    Ash,
+}
+
 // Endesga palette
 pub const SAND_COLOR: Color = Color::hsl(36.0, 0.99, 0.60);
 pub const STONE_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
@@ -149,6 +165,7 @@ pub const ACID_COLOR: Color = Color::hsla(109.0, 0.52, 0.54, 0.7);
 pub const LAVA_COLOR: Color = Color::hsl(357.0, 0.76, 0.56);
 pub const SMOKE_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
 pub const IGNEOUS_COLOR: Color = Color::hsl(334.0, 0.23, 0.20);
+pub const ASH_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
 
 pub const SPARK_COLORS: [Color; 3] = [
     Color::hsl(51.0, 0.99, 0.69),
@@ -173,7 +190,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Water => Particle {
-            health: ParticleHealth::new(1, false),
+            health: ParticleHealth::new(1, false, None),
             color: format_and_variate_color(WATER_COLOR, 0.005),
             movement_type: MovementType::Liquid,
             spread_rate: Some(2),
@@ -183,7 +200,7 @@ pub fn get_particle(material: Material) -> Particle {
                 false,
                 true,
                 false,
-                Some(Material::Steam),
+                Some(ParticleReplacement::new(Some(Material::Steam), 0.8)),
                 0,
             )),
             temperature_changer: Some(TemperatureChanger(5)),
@@ -200,15 +217,18 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Steam => {
             let health = thread_rng().gen_range(100..120);
             Particle {
-                health: ParticleHealth::new(health, false),
+                health: ParticleHealth::new(
+                    health,
+                    false,
+                    Some(ParticleReplacement {
+                        material: Some(Material::Water),
+                        probability: 0.1,
+                    }),
+                ),
                 color: format_and_variate_color(STEAM_COLOR, 0.04),
                 movement_type: MovementType::Gas,
                 density: Density(0),
                 use_gravity: true,
-                particle_death: Some(ParticleDeath {
-                    replace_on_death: Some(Material::Water),
-                    probability: Some(0.1),
-                }),
                 ..default()
             }
         }
@@ -220,7 +240,11 @@ pub fn get_particle(material: Material) -> Particle {
                 density: Density(u32::MAX),
                 use_gravity: true,
                 temperature: Some(Temperature::new(
-                    30, true, true, false, None, // Todo: convert to ash
+                    30,
+                    true,
+                    true,
+                    false,
+                    Some(ParticleReplacement::new(Some(Material::Ash), 0.5)),
                     0,
                 )),
                 burnable: Some(Burnable {
@@ -234,7 +258,7 @@ pub fn get_particle(material: Material) -> Particle {
             }
         }
         Material::Acid => Particle {
-            health: ParticleHealth::new(50, false),
+            health: ParticleHealth::new(50, false, None),
             color: format_and_variate_color(ACID_COLOR, 0.04),
             movement_type: MovementType::Liquid,
             spread_rate: Some(1),
@@ -244,7 +268,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Lava => Particle {
-            health: ParticleHealth::new(1, false),
+            health: ParticleHealth::new(1, false, None),
             color: format_and_variate_color(LAVA_COLOR, 0.005),
             movement_type: MovementType::Liquid,
             density: Density(5),
@@ -253,7 +277,7 @@ pub fn get_particle(material: Material) -> Particle {
                 true,
                 false,
                 true,
-                Some(Material::Igneous),
+                Some(ParticleReplacement::new(Some(Material::Igneous), 0.9)),
                 0,
             )),
             temperature_changer: Some(TemperatureChanger(-5)),
@@ -263,14 +287,14 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Smoke => {
             let health = thread_rng().gen_range(40..55);
             Particle {
-                health: ParticleHealth::new(health, false),
+                health: ParticleHealth::new(
+                    health,
+                    false,
+                    Some(ParticleReplacement::new(None, 1.)),
+                ),
                 color: format_and_variate_color(SMOKE_COLOR, 0.05),
                 movement_type: MovementType::Gas,
                 density: Density(0),
-                particle_death: Some(ParticleDeath {
-                    replace_on_death: None,
-                    probability: None,
-                }),
                 use_gravity: true,
                 ..default()
             }
@@ -279,15 +303,15 @@ pub fn get_particle(material: Material) -> Particle {
             let health = thread_rng().gen_range(5..10);
             let rand_index = thread_rng().gen_range(0..SPARK_COLORS.len());
             Particle {
-                health: ParticleHealth::new(health, false),
+                health: ParticleHealth::new(
+                    health,
+                    false,
+                    Some(ParticleReplacement::new(None, 1.)),
+                ),
                 color: format_and_variate_color(SPARK_COLORS[rand_index], 0.),
                 movement_type: MovementType::Gas,
                 density: Density(1),
                 temperature_changer: Some(TemperatureChanger(-5)),
-                particle_death: Some(ParticleDeath {
-                    replace_on_death: None,
-                    probability: None,
-                }),
                 use_gravity: true,
                 ..default()
             }
@@ -295,6 +319,14 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Igneous => Particle {
             color: format_and_variate_color(IGNEOUS_COLOR, 0.),
             movement_type: MovementType::Solid,
+            density: Density(u32::MAX),
+            // temperature_changer: Some(TemperatureChanger(1)),
+            use_gravity: true,
+            ..default()
+        },
+        Material::Ash => Particle {
+            color: format_and_variate_color(ASH_COLOR, 0.02),
+            movement_type: MovementType::Powder,
             density: Density(u32::MAX),
             use_gravity: true,
             ..default()
