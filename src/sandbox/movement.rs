@@ -80,7 +80,15 @@ fn get_step_data(x: i32, y: i32, sandbox: &Sandbox) -> StepData {
     let valid_rotations = movement_rotations.iter().take(rotation_type_amount);
     let spread_rate = particle.spread_rate.map_or(0, |p| p);
     for &i in valid_rotations {
-        let mut step_data = line_with_rotation(x, y, particle.velocity.x, particle.velocity.y, spread_rate, sandbox, i);
+        let mut step_data = line_with_rotation(
+            x,
+            y,
+            particle.velocity.x,
+            particle.velocity.y,
+            spread_rate,
+            sandbox,
+            i,
+        );
 
         if step_data.moved {
             return step_data;
@@ -113,23 +121,23 @@ fn line_with_rotation(
             v.0 -= spread_rate;
             v.1 -= spread_rate;
             v
-        },
+        }
         2 => {
             let mut v = rotate_45_counterclockwise(w, h);
             v.0 += spread_rate;
             v.1 -= spread_rate;
             v
-        },
+        }
         3 => {
             let mut v = rotate_90_clockwise_normalized(w, h);
             v.0 -= spread_rate;
             v
-        },
-        4 =>  {
+        }
+        4 => {
             let mut v = rotate_90_counterclockwise_normalized(w, h);
             v.0 += spread_rate;
             v
-        },
+        }
         _ => panic!("{} is not a rotation type. Should be 0-4.", rotate_type),
     };
 

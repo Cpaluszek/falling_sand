@@ -14,6 +14,9 @@ pub struct Particle {
     pub use_gravity: bool,
     pub particle_death: Option<ParticleDeath>,
     pub acidity: Option<Acidity>,
+    pub temperature: Option<Temperature>,
+    pub temperature_changer: Option<TemperatureChanger>,
+    pub burnable: Option<Burnable>,
 }
 
 #[derive(Clone, Copy, PartialEq, Default)]
@@ -86,6 +89,53 @@ pub enum Material {
     Steam,
     Wood,
     Acid,
+    Lava,
+    Smoke,
+    Spark,
+}
+
+#[derive(Clone, Copy)]
+pub struct Temperature {
+    pub temperature: i32,
+    pub start_temperature: i32,
+    pub coolable: bool,
+    pub heatable: bool,
+    pub critical_on_cool: bool,
+    pub change_on_critical: Option<Material>,
+    pub explosion_radius: i32,
+}
+
+impl Temperature {
+    pub fn new(
+        start_temperature: i32,
+        coolable: bool,
+        heatable: bool,
+        critical_on_cool: bool,
+        change_on_critical: Option<Material>,
+        explosion_radius: i32,
+    ) -> Self {
+        Self {
+            temperature: start_temperature,
+            start_temperature,
+            coolable,
+            heatable,
+            critical_on_cool,
+            change_on_critical,
+            explosion_radius,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct TemperatureChanger(pub i32);
+
+#[derive(Clone, Copy)]
+pub struct Burnable {
+    pub burn_temperature: i32,
+    pub burn_ticks: i32,
+    pub burn_color: (u8, u8, u8, u8),
+    pub cooled_color: (u8, u8, u8, u8),
+    pub burning: bool,
 }
 
 // Endesga palette
@@ -95,6 +145,9 @@ pub const WATER_COLOR: Color = Color::hsla(198.0, 1.00, 0.43, 0.7);
 pub const STEAM_COLOR: Color = Color::hsl(217.0, 0.21, 0.63);
 pub const WOOD_COLOR: Color = Color::hsl(5.0, 0.34, 0.34);
 pub const ACID_COLOR: Color = Color::hsla(109.0, 0.52, 0.54, 0.7);
+pub const LAVA_COLOR: Color = Color::hsl(357.0, 0.76, 0.56);
+pub const SMOKE_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
+pub const SPARK_COLOR: Color = Color::rgb(204.0 / 255.0, 146.0 / 255.0, 94.0 / 255.0);
 
 pub fn get_particle(material: Material) -> Particle {
     let mut particle = match material {
@@ -103,6 +156,7 @@ pub fn get_particle(material: Material) -> Particle {
             density: Density(u32::MAX),
             use_gravity: true,
             velocity: Velocity::new(4, 0),
+            // Todo: burn to sand
             ..default()
         },
         Material::Water => Particle {
@@ -111,6 +165,15 @@ pub fn get_particle(material: Material) -> Particle {
             movement_type: MovementType::Liquid,
             spread_rate: Some(2),
             density: Density(1),
+            temperature: Some(Temperature::new(
+                30,
+                false,
+                true,
+                false,
+                Some(Material::Steam),
+                0,
+            )),
+            temperature_changer: Some(TemperatureChanger(5)),
             use_gravity: true,
             ..default()
         },
@@ -142,6 +205,17 @@ pub fn get_particle(material: Material) -> Particle {
                 movement_type: MovementType::Solid,
                 density: Density(u32::MAX),
                 use_gravity: true,
+                temperature: Some(Temperature::new(
+                    30, true, true, false, None, // Todo: convert to ash
+                    0,
+                )),
+                burnable: Some(Burnable {
+                    burn_temperature: -1,
+                    burn_ticks: 50,
+                    burn_color: (204, 246, 94, 255), //TODO: define color
+                    cooled_color: (125, 110, 110, 255),
+                    burning: false,
+                }),
                 // TODO: add burnable
                 ..default()
             }
@@ -156,11 +230,59 @@ pub fn get_particle(material: Material) -> Particle {
             use_gravity: true,
             ..default()
         },
+        Material::Lava => Particle {
+            health: ParticleHealth::new(1, false),
+            color: format_and_variate_color(LAVA_COLOR, 0.),
+            movement_type: MovementType::Liquid,
+            density: Density(5),
+            temperature: Some(Temperature::new(
+                50, true, false, true, None, //TODO: add particle Igneous
+                0,
+            )),
+            temperature_changer: Some(TemperatureChanger(-5)),
+            use_gravity: true,
+            ..default()
+        },
+        Material::Smoke => {
+            let health = thread_rng().gen_range(40..55);
+            Particle {
+                health: ParticleHealth::new(health, false),
+                color: format_and_variate_color(SMOKE_COLOR, 0.),
+                movement_type: MovementType::Gas,
+                density: Density(0),
+                particle_death: Some(ParticleDeath {
+                    replace_on_death: None,
+                    probability: None,
+                }),
+                use_gravity: true,
+                ..default()
+            }
+        }
+        Material::Spark => {
+            let health = thread_rng().gen_range(5..10);
+            Particle {
+                health: ParticleHealth::new(health, false),
+                color: format_and_variate_color(SPARK_COLOR, 0.),
+                movement_type: MovementType::Gas,
+                density: Density(1),
+                temperature_changer: Some(TemperatureChanger(-5)),
+                particle_death: Some(ParticleDeath {
+                    replace_on_death: None,
+                    probability: None,
+                }),
+                use_gravity: true,
+                ..default()
+            }
+        }
     };
 
     // Particle spread on spawm
-    let random_velocity_x = thread_rng().gen_range(-3..=3);
-    particle.velocity = Velocity::new(random_velocity_x, -2);
+    if particle.movement_type == MovementType::Powder
+        || particle.movement_type == MovementType::Liquid
+    {
+        let random_velocity_x = thread_rng().gen_range(-3..=3);
+        particle.velocity = Velocity::new(random_velocity_x, -2);
+    }
     particle
 }
 

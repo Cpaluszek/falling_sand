@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
-use super::{movement::step_movement, particle::get_particle, sandbox::*};
+use super::{
+    movement::step_movement, particle::get_particle, sandbox::*, temperature::step_temperature,
+};
 
 pub fn update_particles(mut sandbox_query: Query<&mut Sandbox>) {
     let mut sandbox = sandbox_query
@@ -29,7 +31,8 @@ pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
         _ => {}
     }
 
-    if step_acidity(x, y, sandbox) || step_health(x, y, sandbox) {
+    if step_acidity(x, y, sandbox) || step_temperature(x, y, sandbox) || step_health(x, y, sandbox)
+    {
         return;
     }
 

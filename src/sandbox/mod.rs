@@ -17,6 +17,7 @@ pub mod particle;
 mod render;
 mod sandbox;
 mod simulation;
+mod temperature;
 
 pub const CELL_SIZE: f32 = 4.0;
 pub const SANDBOX_SIZE: (f32, f32) = (

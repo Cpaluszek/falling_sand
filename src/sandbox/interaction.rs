@@ -6,8 +6,8 @@ use bevy_egui::{
 
 use super::{
     particle::{
-        get_particle, Material, ACID_COLOR, SAND_COLOR, STEAM_COLOR, STONE_COLOR, WATER_COLOR,
-        WOOD_COLOR,
+        get_particle, Material, ACID_COLOR, LAVA_COLOR, SAND_COLOR, SMOKE_COLOR, SPARK_COLOR,
+        STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
     },
     sandbox::Sandbox,
     CELL_SIZE,
@@ -60,6 +60,21 @@ impl Plugin for InterationPlugin {
                     (ACID_COLOR.g() * 255.0) as u8,
                     (ACID_COLOR.b() * 255.0) as u8,
                 ),
+                lava: Color32::from_rgb(
+                    (LAVA_COLOR.r() * 255.0) as u8,
+                    (LAVA_COLOR.g() * 255.0) as u8,
+                    (LAVA_COLOR.b() * 255.0) as u8,
+                ),
+                smoke: Color32::from_rgb(
+                    (SMOKE_COLOR.r() * 255.0) as u8,
+                    (SMOKE_COLOR.g() * 255.0) as u8,
+                    (SMOKE_COLOR.b() * 255.0) as u8,
+                ),
+                spark: Color32::from_rgb(
+                    (SPARK_COLOR.r() * 255.0) as u8,
+                    (SPARK_COLOR.g() * 255.0) as u8,
+                    (SPARK_COLOR.b() * 255.0) as u8,
+                ),
             })
             .add_systems(Update, (place_particles, select_particle_ui));
     }
@@ -73,6 +88,9 @@ pub struct ButtonsColors {
     steam: Color32,
     wood: Color32,
     acid: Color32,
+    lava: Color32,
+    smoke: Color32,
+    spark: Color32,
 }
 
 // should be a multiple of cell size
@@ -142,6 +160,33 @@ pub fn select_particle_ui(
                     .clicked()
                 {
                     selected.material = Material::Acid;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Lava").color(Color32::BLACK))
+                            .fill(colors.lava),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Lava;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Smoke").color(Color32::BLACK))
+                            .fill(colors.smoke),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Smoke;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Spark").color(Color32::BLACK))
+                            .fill(colors.spark),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Spark;
                 }
             });
         });
