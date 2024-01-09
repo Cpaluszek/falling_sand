@@ -155,6 +155,7 @@ pub enum Material {
     Ash,
     Oil,
     Glass,
+    Gunpowder,
 }
 
 // https://lospec.com/palette-list/endesga-32
@@ -170,6 +171,7 @@ pub const IGNEOUS_COLOR: Color = Color::hsl(334.0, 0.23, 0.20);
 pub const ASH_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
 pub const OIL_COLOR: Color = Color::hsl(39.0, 0.60, 0.84);
 pub const GLASS_COLOR: Color = Color::hsla(184.0, 0.81, 0.57, 0.7);
+pub const GUNPOWDER_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
 
 pub const SPARK_COLORS: [Color; 3] = [
     Color::hsl(51.0, 0.99, 0.69),
@@ -268,7 +270,7 @@ pub fn get_particle(material: Material) -> Particle {
                     0,
                 )),
                 burnable: Some(Burnable {
-                    burn_temperature: -1,
+                    burn_temperature: 100,
                     burn_ticks: 50,
                     burn_color: format_and_variate_color(WOOD_BURN_COLORS[rand_index], 0.04),
                     cooled_color: format_and_variate_color(WOOD_COLOR, 0.04),
@@ -357,17 +359,33 @@ pub fn get_particle(material: Material) -> Particle {
             density: Density(2),
             temperature: Some(Temperature::new(
                 5,
-                true,
+                false,
                 true,
                 false,
                 Some(ParticleReplacement::new(Some(Material::Spark), 1.)),
                 0,
             )),
             burnable: Some(Burnable {
+                burn_temperature: 42,
+                burn_ticks: 15,
+                burn_color: (204, 146, 95, 255),
+                cooled_color: format_and_variate_color(OIL_COLOR, 0.),
+                burning: false,
+            }),
+            use_gravity: true,
+            ..default()
+        },
+        Material::Gunpowder => Particle {
+            health: ParticleHealth::new(50, false, None),
+            color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
+            movement_type: MovementType::Powder,
+            density: Density(u32::MAX),
+            temperature: Some(Temperature::new(1, true, true, false, None, 5)),
+            burnable: Some(Burnable {
                 burn_temperature: 32,
                 burn_ticks: 15,
                 burn_color: (204, 146, 95, 255),
-                cooled_color: (125, 110, 110, 255),
+                cooled_color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
                 burning: false,
             }),
             use_gravity: true,

@@ -41,15 +41,7 @@ pub fn apply_temperature_to_neighbors(x: usize, y: usize, sandbox: &mut Sandbox)
                     continue;
                 }
 
-                match temperature.critical_on_cool {
-                    true => {
-                        temperature.current = (temperature.current + temp_changer).clamp(0, 100)
-                    }
-                    false => {
-                        temperature.current = (temperature.current + temp_changer)
-                            .clamp(temperature.start_temperature, 100)
-                    }
-                }
+                temperature.current = temperature.current + temp_changer;
             }
         }
     }
@@ -75,15 +67,18 @@ fn step_self(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
 
         // Todo: create a function to replace
         if health.amount <= 0 {
-            let (material, probability) = match temperature.replacement_on_critical {
-                Some(r) => (r.material, r.probability),
-                None => (None, 1.),
+            match temperature.replacement_on_critical {
+                Some(r) => {
+                    if thread_rng().gen_bool(r.probability as f64) {
+                        let replacement = r.material.map(get_particle);
+                        sandbox.set(x, y, replacement);
+                    } else {
+                        sandbox.set(x, y, None);
+                    }
+                }
+                None => sandbox.set(x, y, None),
             };
-            if thread_rng().gen_bool(probability as f64) {
-                let replacement = material.map(get_particle);
-                sandbox.set(x, y, replacement);
-                return true;
-            }
+            return true;
         }
     }
     false
@@ -106,9 +101,7 @@ fn explode(cx: usize, cy: usize, radius: i32, sandbox: &mut Sandbox) {
                     let force = (Vec2::new(x as f32, y as f32) - Vec2::new(cx as f32, cy as f32))
                         .normalize()
                         * 10.0;
-
                     particle.velocity = Velocity::new(force.x as i32, force.y as i32);
-
                     continue;
                 }
 
@@ -126,7 +119,8 @@ fn try_ignite_burnable(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
     if let Some(burnable) = &mut particle.burnable {
-        if burnable.burning || particle.temperature.unwrap().current < 100 {
+        let temp = particle.temperature.unwrap();
+        if burnable.burning || temp.current < burnable.burn_temperature {
             return;
         }
 
@@ -141,7 +135,8 @@ fn try_extenquish_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
     if let Some(burnable) = &mut particle.burnable {
-        if !burnable.burning || particle.temperature.unwrap().current > 0 {
+        let temp = particle.temperature.unwrap();
+        if !burnable.burning || temp.current > burnable.burn_temperature {
             return;
         }
 

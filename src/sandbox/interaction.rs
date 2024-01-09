@@ -6,8 +6,8 @@ use bevy_egui::{
 
 use super::{
     particle::{
-        get_particle, Material, ACID_COLOR, GLASS_COLOR, LAVA_COLOR, OIL_COLOR, SAND_COLOR,
-        SMOKE_COLOR, SPARK_COLORS, STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
+        get_particle, Material, ACID_COLOR, GLASS_COLOR, GUNPOWDER_COLOR, LAVA_COLOR, OIL_COLOR,
+        SAND_COLOR, SMOKE_COLOR, SPARK_COLORS, STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
     },
     sandbox::Sandbox,
     CELL_SIZE,
@@ -85,6 +85,11 @@ impl Plugin for InterationPlugin {
                     (GLASS_COLOR.g() * 255.0) as u8,
                     (GLASS_COLOR.b() * 255.0) as u8,
                 ),
+                gunpowder: Color32::from_rgb(
+                    (GUNPOWDER_COLOR.r() * 255.0) as u8,
+                    (GUNPOWDER_COLOR.g() * 255.0) as u8,
+                    (GUNPOWDER_COLOR.b() * 255.0) as u8,
+                ),
             })
             .add_systems(Update, (place_particles, select_particle_ui));
     }
@@ -103,6 +108,7 @@ pub struct ButtonsColors {
     spark: Color32,
     oil: Color32,
     glass: Color32,
+    gunpowder: Color32,
 }
 
 // should be a multiple of cell size
@@ -217,6 +223,15 @@ pub fn select_particle_ui(
                     .clicked()
                 {
                     selected.material = Material::Glass;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Gunpowder").color(Color32::BLACK))
+                            .fill(colors.gunpowder),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Gunpowder;
                 }
             });
         });
