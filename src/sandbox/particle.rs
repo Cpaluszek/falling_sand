@@ -79,6 +79,7 @@ impl Default for ParticleHealth {
 
 #[derive(Clone, Copy)]
 pub struct ParticleReplacement {
+    // Note: remove option here or in parent?
     pub material: Option<Material>,
     pub probability: f32,
 }
@@ -152,7 +153,8 @@ pub enum Material {
     Spark,
     Igneous,
     Ash,
-    Alcohol,
+    Oil,
+    Glass,
 }
 
 // https://lospec.com/palette-list/endesga-32
@@ -166,7 +168,8 @@ pub const LAVA_COLOR: Color = Color::hsl(357.0, 0.76, 0.56);
 pub const SMOKE_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
 pub const IGNEOUS_COLOR: Color = Color::hsl(334.0, 0.23, 0.20);
 pub const ASH_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
-pub const ALCOHOL_COLOR: Color = Color::hsl(39.0, 0.60, 0.84);
+pub const OIL_COLOR: Color = Color::hsl(39.0, 0.60, 0.84);
+pub const GLASS_COLOR: Color = Color::hsla(184.0, 0.81, 0.57, 0.7);
 
 pub const SPARK_COLORS: [Color; 3] = [
     Color::hsl(51.0, 0.99, 0.69),
@@ -186,10 +189,26 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(SAND_COLOR, 0.04),
             density: Density(u32::MAX),
             use_gravity: true,
-            velocity: Velocity::new(4, 0),
+            temperature: Some(Temperature::new(
+                50,
+                true,
+                true,
+                false,
+                Some(ParticleReplacement::new(Some(Material::Glass), 1.)),
+                0,
+            )),
             // Todo: burn to sand
             ..default()
         },
+        Material::Glass => Particle {
+            health: ParticleHealth::new(50, false, None),
+            color: format_and_variate_color(GLASS_COLOR, 0.),
+            movement_type: MovementType::Solid,
+            density: Density(u32::MAX),
+            use_gravity: true,
+            ..default()
+        },
+
         Material::Water => Particle {
             health: ParticleHealth::new(1, false, None),
             color: format_and_variate_color(WATER_COLOR, 0.005),
@@ -331,9 +350,9 @@ pub fn get_particle(material: Material) -> Particle {
             use_gravity: true,
             ..default()
         },
-        Material::Alcohol => Particle {
+        Material::Oil => Particle {
             health: ParticleHealth::new(50, false, None),
-            color: format_and_variate_color(ALCOHOL_COLOR, 0.),
+            color: format_and_variate_color(OIL_COLOR, 0.),
             movement_type: MovementType::Liquid,
             density: Density(2),
             temperature: Some(Temperature::new(

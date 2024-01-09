@@ -154,6 +154,7 @@ fn try_extenquish_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
 }
 
 fn spark_if_ignited(x: usize, y: usize, sandbox: &mut Sandbox) {
+    // TODO: add particle field to list emitted particles during burning
     match sandbox.get_mut(x, y).unwrap().burnable {
         Some(burnable) => {
             if !burnable.burning {
