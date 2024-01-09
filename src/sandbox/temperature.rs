@@ -172,7 +172,7 @@ fn spark_if_ignited(x: usize, y: usize, sandbox: &mut Sandbox) {
         if sandbox.checked_get(neighbor_x, neighbor_y).is_none()
             && !sandbox.out_of_bounds_usize(neighbor_x, neighbor_y)
         {
-            let new_p = if thread_rng().gen_ratio(1, 3) {
+            let new_p = if thread_rng().gen_ratio(2, 3) {
                 get_particle(Material::Spark)
             } else {
                 get_particle(Material::Smoke)

@@ -6,8 +6,8 @@ use bevy_egui::{
 
 use super::{
     particle::{
-        get_particle, Material, ACID_COLOR, LAVA_COLOR, SAND_COLOR, SMOKE_COLOR, SPARK_COLORS,
-        STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
+        get_particle, Material, ACID_COLOR, ALCOHOL_COLOR, LAVA_COLOR, SAND_COLOR, SMOKE_COLOR,
+        SPARK_COLORS, STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
     },
     sandbox::Sandbox,
     CELL_SIZE,
@@ -75,6 +75,11 @@ impl Plugin for InterationPlugin {
                     (SPARK_COLORS[0].g() * 255.0) as u8,
                     (SPARK_COLORS[0].b() * 255.0) as u8,
                 ),
+                alcohol: Color32::from_rgb(
+                    (ALCOHOL_COLOR.r() * 255.0) as u8,
+                    (ALCOHOL_COLOR.g() * 255.0) as u8,
+                    (ALCOHOL_COLOR.b() * 255.0) as u8,
+                ),
             })
             .add_systems(Update, (place_particles, select_particle_ui));
     }
@@ -91,6 +96,7 @@ pub struct ButtonsColors {
     lava: Color32,
     smoke: Color32,
     spark: Color32,
+    alcohol: Color32,
 }
 
 // should be a multiple of cell size
@@ -187,6 +193,15 @@ pub fn select_particle_ui(
                     .clicked()
                 {
                     selected.material = Material::Spark;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Alcohol").color(Color32::BLACK))
+                            .fill(colors.alcohol),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Alcohol;
                 }
             });
         });

@@ -152,9 +152,10 @@ pub enum Material {
     Spark,
     Igneous,
     Ash,
+    Alcohol,
 }
 
-// Endesga palette
+// https://lospec.com/palette-list/endesga-32
 pub const SAND_COLOR: Color = Color::hsl(36.0, 0.99, 0.60);
 pub const STONE_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
 pub const WATER_COLOR: Color = Color::hsla(198.0, 1.00, 0.43, 0.7);
@@ -165,6 +166,7 @@ pub const LAVA_COLOR: Color = Color::hsl(357.0, 0.76, 0.56);
 pub const SMOKE_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
 pub const IGNEOUS_COLOR: Color = Color::hsl(334.0, 0.23, 0.20);
 pub const ASH_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
+pub const ALCOHOL_COLOR: Color = Color::hsl(39.0, 0.60, 0.84);
 
 pub const SPARK_COLORS: [Color; 3] = [
     Color::hsl(51.0, 0.99, 0.69),
@@ -319,7 +321,6 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(IGNEOUS_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
-            // temperature_changer: Some(TemperatureChanger(1)),
             use_gravity: true,
             ..default()
         },
@@ -330,7 +331,32 @@ pub fn get_particle(material: Material) -> Particle {
             use_gravity: true,
             ..default()
         },
+        Material::Alcohol => Particle {
+            health: ParticleHealth::new(50, false, None),
+            color: format_and_variate_color(ALCOHOL_COLOR, 0.),
+            movement_type: MovementType::Liquid,
+            density: Density(2),
+            temperature: Some(Temperature::new(
+                5,
+                true,
+                true,
+                false,
+                Some(ParticleReplacement::new(Some(Material::Spark), 1.)),
+                0,
+            )),
+            burnable: Some(Burnable {
+                burn_temperature: 32,
+                burn_ticks: 15,
+                burn_color: (204, 146, 95, 255),
+                cooled_color: (125, 110, 110, 255),
+                burning: false,
+            }),
+            use_gravity: true,
+            ..default()
+        },
     };
+
+    // TODO: spark movement in all directions
 
     // Particle spread on spawm
     if particle.movement_type == MovementType::Powder
