@@ -81,16 +81,13 @@ pub fn step_acidity(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         (x, y + 1),
     ] {
         if let Some(particle) = sandbox.checked_get_mut(neighbor_x, neighbor_y) {
-            let health = &mut particle.health;
-            if !health.corrodable {
-                continue;
-            }
+            if let Some(corrodable) = particle.corrodable.as_mut() {
+                corrodable.0 -= acidity;
+                acid_ticks += 1;
 
-            health.amount -= acidity;
-            acid_ticks += 1;
-
-            if health.amount < 0 {
-                sandbox.set(neighbor_x, neighbor_y, None);
+                if corrodable.0 <= 0 {
+                    sandbox.set(neighbor_x, neighbor_y, None);
+                }
             }
         }
     }
