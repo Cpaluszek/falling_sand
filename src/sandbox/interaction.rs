@@ -7,7 +7,8 @@ use bevy_egui::{
 use super::{
     particle::{
         get_particle, Material, ACID_COLOR, GLASS_COLOR, GUNPOWDER_COLOR, LAVA_COLOR, OIL_COLOR,
-        SAND_COLOR, SMOKE_COLOR, SPARK_COLORS, STEAM_COLOR, STONE_COLOR, WATER_COLOR, WOOD_COLOR,
+        SAND_COLOR, SMOKE_COLOR, SPARK_COLORS, STEAM_COLOR, STONE_COLOR, TNT_COLOR, WATER_COLOR,
+        WOOD_COLOR,
     },
     sandbox::Sandbox,
     CELL_SIZE,
@@ -19,6 +20,23 @@ pub const BRUSH_RADIUS_SQR: isize = BRUSH_RADIUS * BRUSH_RADIUS;
 #[derive(Resource)]
 pub struct SelectedParticle {
     material: Material,
+}
+
+#[derive(Resource)]
+pub struct ButtonsColors {
+    sand: Color32,
+    water: Color32,
+    stone: Color32,
+    steam: Color32,
+    wood: Color32,
+    acid: Color32,
+    lava: Color32,
+    smoke: Color32,
+    spark: Color32,
+    oil: Color32,
+    glass: Color32,
+    gunpowder: Color32,
+    tnt: Color32,
 }
 
 pub struct InterationPlugin;
@@ -90,25 +108,14 @@ impl Plugin for InterationPlugin {
                     (GUNPOWDER_COLOR.g() * 255.0) as u8,
                     (GUNPOWDER_COLOR.b() * 255.0) as u8,
                 ),
+                tnt: Color32::from_rgb(
+                    (TNT_COLOR.r() * 255.0) as u8,
+                    (TNT_COLOR.g() * 255.0) as u8,
+                    (TNT_COLOR.b() * 255.0) as u8,
+                ),
             })
             .add_systems(Update, (place_particles, select_particle_ui));
     }
-}
-
-#[derive(Resource)]
-pub struct ButtonsColors {
-    sand: Color32,
-    water: Color32,
-    stone: Color32,
-    steam: Color32,
-    wood: Color32,
-    acid: Color32,
-    lava: Color32,
-    smoke: Color32,
-    spark: Color32,
-    oil: Color32,
-    glass: Color32,
-    gunpowder: Color32,
 }
 
 // should be a multiple of cell size
@@ -232,6 +239,15 @@ pub fn select_particle_ui(
                     .clicked()
                 {
                     selected.material = Material::Gunpowder;
+                }
+                if ui
+                    .add(
+                        egui::Button::new(RichText::from("Tnt").color(Color32::BLACK))
+                            .fill(colors.tnt),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Tnt;
                 }
             });
         });

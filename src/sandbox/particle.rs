@@ -156,6 +156,7 @@ pub enum Material {
     Oil,
     Glass,
     Gunpowder,
+    Tnt,
 }
 
 // https://lospec.com/palette-list/endesga-32
@@ -172,6 +173,7 @@ pub const ASH_COLOR: Color = Color::hsl(220.0, 0.20, 0.44);
 pub const OIL_COLOR: Color = Color::hsl(39.0, 0.60, 0.84);
 pub const GLASS_COLOR: Color = Color::hsla(184.0, 0.81, 0.57, 0.7);
 pub const GUNPOWDER_COLOR: Color = Color::hsl(216.0, 0.29, 0.81);
+pub const TNT_COLOR: Color = Color::hsl(354.0, 0.62, 0.39);
 
 pub const SPARK_COLORS: [Color; 3] = [
     Color::hsl(51.0, 0.99, 0.69),
@@ -388,6 +390,15 @@ pub fn get_particle(material: Material) -> Particle {
                 cooled_color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
                 burning: false,
             }),
+            use_gravity: true,
+            ..default()
+        },
+        Material::Tnt => Particle {
+            health: ParticleHealth::new(50, false, None),
+            color: format_and_variate_color(TNT_COLOR, 0.),
+            movement_type: MovementType::Solid,
+            density: Density(u32::MAX),
+            temperature: Some(Temperature::new(1, true, true, false, None, 15)),
             use_gravity: true,
             ..default()
         },
