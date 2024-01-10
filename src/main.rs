@@ -6,6 +6,8 @@ use sandbox::SandboxPlugin;
 
 pub const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 
+// TODO: add post processing
+
 fn main() {
     App::new()
         .add_plugins(
