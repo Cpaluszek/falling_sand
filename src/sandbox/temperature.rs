@@ -67,11 +67,10 @@ fn step_self(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
 
         // Todo: create a function to replace
         if health.amount <= 0 {
-            match temperature.replacement_on_critical {
-                Some(r) => {
-                    if thread_rng().gen_bool(r.probability as f64) {
-                        let replacement = r.material.map(get_particle);
-                        sandbox.set(x, y, replacement);
+            match temperature.replacement_on_critical.material {
+                Some(mat) => {
+                    if thread_rng().gen_bool(temperature.replacement_on_critical.probability as f64) {
+                        sandbox.set(x, y, Some(get_particle(mat)));
                     } else {
                         sandbox.set(x, y, None);
                     }

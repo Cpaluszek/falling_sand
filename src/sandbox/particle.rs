@@ -79,7 +79,6 @@ impl Default for ParticleHealth {
 
 #[derive(Clone, Copy)]
 pub struct ParticleReplacement {
-    // Note: remove option here or in parent?
     pub material: Option<Material>,
     pub probability: f32,
 }
@@ -103,7 +102,7 @@ pub struct Temperature {
     pub coolable: bool,
     pub heatable: bool,
     pub critical_on_cool: bool,
-    pub replacement_on_critical: Option<ParticleReplacement>,
+    pub replacement_on_critical: ParticleReplacement,
     pub explosion_radius: i32,
 }
 
@@ -113,7 +112,7 @@ impl Temperature {
         coolable: bool,
         heatable: bool,
         critical_on_cool: bool,
-        replacement_on_critical: Option<ParticleReplacement>,
+        replacement_on_critical: ParticleReplacement,
         explosion_radius: i32,
     ) -> Self {
         Self {
@@ -198,7 +197,7 @@ pub fn get_particle(material: Material) -> Particle {
                 true,
                 true,
                 false,
-                Some(ParticleReplacement::new(Some(Material::Glass), 1.)),
+                ParticleReplacement::new(Some(Material::Glass), 1.),
                 0,
             )),
             // Todo: burn to sand
@@ -224,7 +223,7 @@ pub fn get_particle(material: Material) -> Particle {
                 false,
                 true,
                 false,
-                Some(ParticleReplacement::new(Some(Material::Steam), 0.8)),
+                ParticleReplacement::new(Some(Material::Steam), 0.8),
                 0,
             )),
             temperature_changer: Some(TemperatureChanger(-5)),
@@ -268,7 +267,7 @@ pub fn get_particle(material: Material) -> Particle {
                     true,
                     true,
                     false,
-                    Some(ParticleReplacement::new(Some(Material::Ash), 0.3)),
+                    ParticleReplacement::new(Some(Material::Ash), 0.3),
                     0,
                 )),
                 burnable: Some(Burnable {
@@ -301,7 +300,7 @@ pub fn get_particle(material: Material) -> Particle {
                 true,
                 false,
                 true,
-                Some(ParticleReplacement::new(Some(Material::Igneous), 0.9)),
+                ParticleReplacement::new(Some(Material::Igneous), 0.9),
                 0,
             )),
             temperature_changer: Some(TemperatureChanger(5)),
@@ -364,7 +363,7 @@ pub fn get_particle(material: Material) -> Particle {
                 false,
                 true,
                 false,
-                Some(ParticleReplacement::new(Some(Material::Spark), 1.)),
+                ParticleReplacement::new(Some(Material::Spark), 1.),
                 0,
             )),
             burnable: Some(Burnable {
@@ -382,7 +381,7 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
             movement_type: MovementType::Powder,
             density: Density(u32::MAX),
-            temperature: Some(Temperature::new(1, true, true, false, None, 5)),
+            temperature: Some(Temperature::new(1, true, true, false, ParticleReplacement::new(None, 1.), 5)),
             burnable: Some(Burnable {
                 burn_temperature: 32,
                 burn_ticks: 15,
@@ -398,7 +397,7 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(TNT_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
-            temperature: Some(Temperature::new(1, true, true, false, None, 15)),
+            temperature: Some(Temperature::new(1, true, true, false, ParticleReplacement::new(None, 1.), 15)),
             use_gravity: true,
             ..default()
         },
