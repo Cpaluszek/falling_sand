@@ -78,7 +78,7 @@ fn get_step_data(x: i32, y: i32, sandbox: &Sandbox) -> StepData {
     };
 
     let valid_rotations = movement_rotations.iter().take(rotation_type_amount);
-    let spread_rate = particle.spread_rate.map_or(0, |p| p);
+    let spread_rate = particle.spread_rate;
     for &i in valid_rotations {
         let mut step_data = line_with_rotation(
             x,

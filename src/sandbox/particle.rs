@@ -9,7 +9,7 @@ pub struct Particle {
     pub density: Density,
     pub color: (u8, u8, u8, u8),
     pub movement_type: MovementType,
-    pub spread_rate: Option<i32>,
+    pub spread_rate: i32,
     pub updated: bool,
     pub use_gravity: bool,
     pub acidity: Option<Acidity>,
@@ -200,7 +200,6 @@ pub fn get_particle(material: Material) -> Particle {
                 ParticleReplacement::new(Some(Material::Glass), 1.),
                 0,
             )),
-            // Todo: burn to sand
             ..default()
         },
         Material::Glass => Particle {
@@ -216,7 +215,7 @@ pub fn get_particle(material: Material) -> Particle {
             health: ParticleHealth::new(1, false, None),
             color: format_and_variate_color(WATER_COLOR, 0.005),
             movement_type: MovementType::Liquid,
-            spread_rate: Some(2),
+            spread_rate: 2,
             density: Density(1),
             temperature: Some(Temperature::new(
                 30,
@@ -284,7 +283,7 @@ pub fn get_particle(material: Material) -> Particle {
             health: ParticleHealth::new(50, false, None),
             color: format_and_variate_color(ACID_COLOR, 0.04),
             movement_type: MovementType::Liquid,
-            spread_rate: Some(1),
+            spread_rate: 1,
             density: Density(2),
             acidity: Some(Acidity(5)),
             use_gravity: true,
@@ -381,7 +380,14 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
             movement_type: MovementType::Powder,
             density: Density(u32::MAX),
-            temperature: Some(Temperature::new(1, true, true, false, ParticleReplacement::new(None, 1.), 5)),
+            temperature: Some(Temperature::new(
+                1,
+                true,
+                true,
+                false,
+                ParticleReplacement::new(None, 1.),
+                5,
+            )),
             burnable: Some(Burnable {
                 burn_temperature: 32,
                 burn_ticks: 15,
@@ -397,21 +403,36 @@ pub fn get_particle(material: Material) -> Particle {
             color: format_and_variate_color(TNT_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
-            temperature: Some(Temperature::new(1, true, true, false, ParticleReplacement::new(None, 1.), 15)),
+            temperature: Some(Temperature::new(
+                1,
+                true,
+                true,
+                false,
+                ParticleReplacement::new(None, 1.),
+                15,
+            )),
             use_gravity: true,
             ..default()
         },
     };
 
-    // TODO: spark movement in all directions
-
     // Particle spread on spawm
-    if particle.movement_type == MovementType::Powder
-        || particle.movement_type == MovementType::Liquid
-    {
-        let random_velocity_x = thread_rng().gen_range(-3..=3);
-        particle.velocity = Velocity::new(random_velocity_x, -2);
+    let random_velocity_x: i32;
+    let random_velocity_y: i32;
+    match (material, particle.movement_type) {
+        (Material::Spark, _) => {
+            random_velocity_x = thread_rng().gen_range(-6..=6);
+            random_velocity_y = thread_rng().gen_range(-6..=6);
+        }
+        (_, MovementType::Powder | MovementType::Liquid) => {
+            random_velocity_x = thread_rng().gen_range(-3..=3);
+            random_velocity_y = -2;
+        }
+        (_, _) => {
+            return particle;
+        }
     }
+    particle.velocity = Velocity::new(random_velocity_x, random_velocity_y);
     particle
 }
 
