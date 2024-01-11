@@ -2,7 +2,7 @@ use bevy::prelude::Vec2;
 use rand::{thread_rng, Rng};
 
 use super::{
-    particle::{get_particle, Material, ParticleHealth, TemperatureChanger, Velocity},
+    particle::{get_particle, Material, TemperatureChanger, Velocity},
     sandbox::Sandbox,
 };
 
@@ -63,10 +63,10 @@ fn step_self(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
             return true;
         }
 
-        deplete_critical(health);
+        *health -= 1;
 
         // Todo: create a function to replace
-        if health.amount <= 0 {
+        if *health <= 0 {
             match temperature.replacement_on_critical.material {
                 Some(mat) => {
                     if thread_rng().gen_bool(temperature.replacement_on_critical.probability as f64)
@@ -111,10 +111,6 @@ fn explode(cx: usize, cy: usize, radius: i32, sandbox: &mut Sandbox) {
     }
 }
 
-fn deplete_critical(health: &mut ParticleHealth) {
-    health.amount -= 1;
-}
-
 fn try_ignite_burnable(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
@@ -126,7 +122,9 @@ fn try_ignite_burnable(x: usize, y: usize, sandbox: &mut Sandbox) {
 
         burnable.burning = true;
         particle.temperature_changer = Some(TemperatureChanger(2));
-        particle.health.amount = burnable.burn_ticks;
+        if particle.health < burnable.burn_ticks {
+            particle.health = burnable.burn_ticks;
+        }
         particle.color = burnable.burn_color;
     }
 }
@@ -142,7 +140,6 @@ fn try_extenquish_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
 
         burnable.burning = false;
         particle.temperature_changer = None;
-        particle.health.amount = burnable.burn_ticks;
         particle.color = burnable.cooled_color;
         particle.temperature.unwrap().current = particle.temperature.unwrap().start_temperature;
     }

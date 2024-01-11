@@ -21,8 +21,8 @@ pub fn update_particles(mut sandbox_query: Query<&mut Sandbox>) {
 
 pub fn step_particle(x: usize, y: usize, sandbox: &mut Sandbox) {
     match sandbox.get(x, y) {
-        Some(p) if p.updated || p.health.amount <= 0 => {
-            if p.health.amount <= 0 {
+        Some(p) if p.updated || p.health <= 0 => {
+            if p.health <= 0 {
                 sandbox.set(x, y, None);
             }
             return;
@@ -45,17 +45,17 @@ pub fn step_health(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         None => return false,
     };
 
-    let (replacement, probability) = match &particle.health.replacement {
-        Some(new_p) => (new_p.material, new_p.probability),
+    let replacement = match &particle.lifespan {
+        Some(lifespan) => lifespan.replacement,
         None => return false,
     };
 
     let health = &mut sandbox.get_mut(x, y).unwrap().health;
-    health.amount -= 1;
+    *health -= 1;
 
-    if health.amount <= 0 {
-        if thread_rng().gen_bool(probability.into()) {
-            let replacement = replacement.map(get_particle);
+    if *health <= 0 {
+        if thread_rng().gen_bool(replacement.probability.into()) {
+            let replacement = replacement.material.map(get_particle);
             sandbox.set(x, y, replacement);
         }
         return true;
@@ -92,9 +92,9 @@ pub fn step_acidity(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         }
     }
     let acid_health = &mut sandbox.get_mut(x, y).unwrap().health;
-    acid_health.amount -= acid_ticks;
+    *acid_health -= acid_ticks;
 
-    if acid_health.amount <= 0 {
+    if *acid_health <= 0 {
         sandbox.set(x, y, None);
         return true;
     }

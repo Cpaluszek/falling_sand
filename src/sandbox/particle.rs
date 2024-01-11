@@ -4,7 +4,8 @@ use std::cmp::Ordering;
 
 #[derive(Clone, Copy, Default)]
 pub struct Particle {
-    pub health: ParticleHealth,
+    pub lifespan: Option<LifeSpan>,
+    pub health: i32,
     pub velocity: Velocity,
     pub density: Density,
     pub color: (u8, u8, u8, u8),
@@ -52,32 +53,18 @@ impl Velocity {
 pub struct Density(pub u32);
 
 #[derive(Clone, Copy)]
-pub struct ParticleHealth {
-    pub amount: i32,
-    pub replacement: Option<ParticleReplacement>,
+pub struct LifeSpan {
+    pub replacement: ParticleReplacement,
 }
 
-impl ParticleHealth {
-    fn new(amount: i32, replacement: Option<ParticleReplacement>) -> Self {
-        Self {
-            amount,
-            replacement,
-        }
-    }
-}
-
-impl Default for ParticleHealth {
-    fn default() -> Self {
-        Self {
-            amount: 50,
-            replacement: None,
-        }
+impl LifeSpan {
+    fn new(replacement: ParticleReplacement) -> Self {
+        Self { replacement }
     }
 }
 
 #[derive(Clone, Copy)]
 pub struct Corrodable(pub i32);
-
 
 #[derive(Clone, Copy)]
 pub struct ParticleReplacement {
@@ -191,7 +178,7 @@ pub const WOOD_BURN_COLORS: [Color; 3] = [
 pub fn get_particle(material: Material) -> Particle {
     let mut particle = match material {
         Material::Sand => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(SAND_COLOR, 0.04),
             density: Density(u32::MAX),
             use_gravity: true,
@@ -207,7 +194,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Glass => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(GLASS_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
@@ -216,7 +203,7 @@ pub fn get_particle(material: Material) -> Particle {
         },
 
         Material::Water => Particle {
-            health: ParticleHealth::new(1, None),
+            health: 50,
             color: format_and_variate_color(WATER_COLOR, 0.005),
             movement_type: MovementType::Liquid,
             spread_rate: 2,
@@ -234,6 +221,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Stone => Particle {
+            health: 50,
             color: format_and_variate_color(STONE_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
@@ -244,13 +232,11 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Steam => {
             let health = thread_rng().gen_range(100..120);
             Particle {
-                health: ParticleHealth::new(
-                    health,
-                    Some(ParticleReplacement {
-                        material: Some(Material::Water),
-                        probability: 0.1,
-                    }),
-                ),
+                health,
+                lifespan: Some(LifeSpan::new(ParticleReplacement {
+                    material: Some(Material::Water),
+                    probability: 0.1,
+                })),
                 color: format_and_variate_color(STEAM_COLOR, 0.04),
                 movement_type: MovementType::Gas,
                 density: Density(0),
@@ -261,6 +247,7 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Wood => {
             let rand_index = thread_rng().gen_range(0..WOOD_BURN_COLORS.len());
             Particle {
+                health: 50,
                 color: format_and_variate_color(WOOD_COLOR, 0.04),
                 movement_type: MovementType::Solid,
                 density: Density(u32::MAX),
@@ -285,7 +272,7 @@ pub fn get_particle(material: Material) -> Particle {
             }
         }
         Material::Acid => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(ACID_COLOR, 0.04),
             movement_type: MovementType::Liquid,
             spread_rate: 1,
@@ -295,7 +282,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Lava => Particle {
-            health: ParticleHealth::new(1, None),
+            health: 50,
             color: format_and_variate_color(LAVA_COLOR, 0.005),
             movement_type: MovementType::Liquid,
             density: Density(5),
@@ -314,10 +301,8 @@ pub fn get_particle(material: Material) -> Particle {
         Material::Smoke => {
             let health = thread_rng().gen_range(40..55);
             Particle {
-                health: ParticleHealth::new(
-                    health,
-                    Some(ParticleReplacement::new(None, 1.)),
-                ),
+                health,
+                lifespan: Some(LifeSpan::new(ParticleReplacement::new(None, 1.))),
                 color: format_and_variate_color(SMOKE_COLOR, 0.05),
                 movement_type: MovementType::Gas,
                 density: Density(0),
@@ -329,10 +314,8 @@ pub fn get_particle(material: Material) -> Particle {
             let health = thread_rng().gen_range(5..10);
             let rand_index = thread_rng().gen_range(0..SPARK_COLORS.len());
             Particle {
-                health: ParticleHealth::new(
-                    health,
-                    Some(ParticleReplacement::new(None, 1.)),
-                ),
+                health,
+                lifespan: Some(LifeSpan::new(ParticleReplacement::new(None, 1.))),
                 color: format_and_variate_color(SPARK_COLORS[rand_index], 0.),
                 movement_type: MovementType::Gas,
                 density: Density(1),
@@ -342,6 +325,7 @@ pub fn get_particle(material: Material) -> Particle {
             }
         }
         Material::Igneous => Particle {
+            health: 50,
             color: format_and_variate_color(IGNEOUS_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
@@ -350,6 +334,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Ash => Particle {
+            health: 50,
             color: format_and_variate_color(ASH_COLOR, 0.02),
             movement_type: MovementType::Powder,
             density: Density(u32::MAX),
@@ -358,7 +343,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Oil => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(OIL_COLOR, 0.),
             movement_type: MovementType::Liquid,
             density: Density(2),
@@ -381,7 +366,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Gunpowder => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
             movement_type: MovementType::Powder,
             density: Density(u32::MAX),
@@ -405,7 +390,7 @@ pub fn get_particle(material: Material) -> Particle {
             ..default()
         },
         Material::Tnt => Particle {
-            health: ParticleHealth::new(50, None),
+            health: 50,
             color: format_and_variate_color(TNT_COLOR, 0.),
             movement_type: MovementType::Solid,
             density: Density(u32::MAX),
