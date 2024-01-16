@@ -143,12 +143,12 @@ pub fn select_particle_ui(
                 }
                 if ui
                     .add(
-                        egui::Button::new(RichText::from("Water").color(Color32::BLACK))
-                            .fill(colors.water),
+                        egui::Button::new(RichText::from("Wood").color(Color32::BLACK))
+                            .fill(colors.wood),
                     )
                     .clicked()
                 {
-                    selected.material = Material::Water;
+                    selected.material = Material::Wood;
                 }
                 if ui
                     .add(
@@ -161,21 +161,12 @@ pub fn select_particle_ui(
                 }
                 if ui
                     .add(
-                        egui::Button::new(RichText::from("Steam").color(Color32::BLACK))
-                            .fill(colors.steam),
+                        egui::Button::new(RichText::from("Water").color(Color32::BLACK))
+                            .fill(colors.water),
                     )
                     .clicked()
                 {
-                    selected.material = Material::Steam;
-                }
-                if ui
-                    .add(
-                        egui::Button::new(RichText::from("Wood").color(Color32::BLACK))
-                            .fill(colors.wood),
-                    )
-                    .clicked()
-                {
-                    selected.material = Material::Wood;
+                    selected.material = Material::Water;
                 }
                 if ui
                     .add(
@@ -197,6 +188,15 @@ pub fn select_particle_ui(
                 }
                 if ui
                     .add(
+                        egui::Button::new(RichText::from("Oil").color(Color32::BLACK))
+                            .fill(colors.oil),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Oil;
+                }
+                if ui
+                    .add(
                         egui::Button::new(RichText::from("Smoke").color(Color32::BLACK))
                             .fill(colors.smoke),
                     )
@@ -206,21 +206,21 @@ pub fn select_particle_ui(
                 }
                 if ui
                     .add(
+                        egui::Button::new(RichText::from("Steam").color(Color32::BLACK))
+                            .fill(colors.steam),
+                    )
+                    .clicked()
+                {
+                    selected.material = Material::Steam;
+                }
+                if ui
+                    .add(
                         egui::Button::new(RichText::from("Spark").color(Color32::BLACK))
                             .fill(colors.spark),
                     )
                     .clicked()
                 {
                     selected.material = Material::Spark;
-                }
-                if ui
-                    .add(
-                        egui::Button::new(RichText::from("Oil").color(Color32::BLACK))
-                            .fill(colors.oil),
-                    )
-                    .clicked()
-                {
-                    selected.material = Material::Oil;
                 }
                 if ui
                     .add(

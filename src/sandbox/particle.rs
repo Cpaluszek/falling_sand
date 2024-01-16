@@ -126,6 +126,8 @@ pub struct Burnable {
     pub burn_color: (u8, u8, u8, u8),
     pub cooled_color: (u8, u8, u8, u8),
     pub burning: bool,
+    pub emission: Option<Material>,
+    pub emit_smoke: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -266,6 +268,8 @@ pub fn get_particle(material: Material) -> Particle {
                     burn_color: format_and_variate_color(WOOD_BURN_COLORS[rand_index], 0.04),
                     cooled_color: format_and_variate_color(WOOD_COLOR, 0.04),
                     burning: false,
+                    emission: Some(Material::Spark),
+                    emit_smoke: true,
                 }),
                 corrodable: Some(Corrodable(50)),
                 ..default()
@@ -361,6 +365,8 @@ pub fn get_particle(material: Material) -> Particle {
                 burn_color: (204, 146, 95, 255),
                 cooled_color: format_and_variate_color(OIL_COLOR, 0.),
                 burning: false,
+                emission: None,
+                emit_smoke: false,
             }),
             use_gravity: true,
             ..default()
@@ -384,6 +390,8 @@ pub fn get_particle(material: Material) -> Particle {
                 burn_color: (204, 146, 95, 255),
                 cooled_color: format_and_variate_color(GUNPOWDER_COLOR, 0.),
                 burning: false,
+                emission: None,
+                emit_smoke: true,
             }),
             use_gravity: true,
             corrodable: Some(Corrodable(50)),

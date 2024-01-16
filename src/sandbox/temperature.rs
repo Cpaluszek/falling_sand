@@ -130,14 +130,18 @@ fn step_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
 }
 
 fn spark_if_ignited(x: usize, y: usize, sandbox: &mut Sandbox) {
-    // TODO: add particle field to list emitted particles during burning
-    match sandbox.get_mut(x, y).unwrap().burnable {
+    let burnable = match sandbox.get_mut(x, y).unwrap().burnable {
         Some(burnable) => {
             if !burnable.burning {
                 return;
             }
+            burnable
         }
         None => return,
+    };
+
+    if !burnable.emit_smoke && burnable.emission.is_none() {
+        return;
     }
 
     for (neighbor_x, neighbor_y) in [
@@ -149,13 +153,18 @@ fn spark_if_ignited(x: usize, y: usize, sandbox: &mut Sandbox) {
         if sandbox.checked_get(neighbor_x, neighbor_y).is_none()
             && !sandbox.out_of_bounds_usize(neighbor_x, neighbor_y)
         {
-            let new_p = if thread_rng().gen_ratio(2, 3) {
-                get_particle(Material::Spark)
-            } else {
-                get_particle(Material::Smoke)
-            };
-
-            sandbox.set(neighbor_x, neighbor_y, Some(new_p));
+            if let Some(material) = burnable.emission {
+                let new_p = if thread_rng().gen_ratio(2, 3) {
+                    get_particle(material)
+                } else if burnable.emit_smoke {
+                    get_particle(Material::Smoke)
+                } else {
+                    continue;
+                };
+                sandbox.set(neighbor_x, neighbor_y, Some(new_p));
+            } else if thread_rng().gen_ratio(2, 3) {
+                    sandbox.set(neighbor_x, neighbor_y, Some(get_particle(Material::Smoke)));
+            }
         }
     }
 }

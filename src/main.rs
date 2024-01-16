@@ -4,9 +4,7 @@ mod sandbox;
 mod utils;
 use sandbox::SandboxPlugin;
 
-pub const RESOLUTION: (f32, f32) = (1280.0, 720.0);
-
-// TODO: add post processing
+pub const RESOLUTION: (f32, f32) = (1280.0, 960.0);
 
 fn main() {
     App::new()
