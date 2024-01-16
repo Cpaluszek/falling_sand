@@ -13,8 +13,7 @@ pub fn step_temperature(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
         return true;
     }
 
-    try_ignite_burnable(x, y, sandbox);
-    try_extenquish_burning(x, y, sandbox);
+    step_burning(x, y, sandbox);
     spark_if_ignited(x, y, sandbox);
     false
 }
@@ -25,7 +24,6 @@ pub fn apply_temperature_to_neighbors(x: usize, y: usize, sandbox: &mut Sandbox)
         None => return,
     };
 
-    // Todo: create function for neighbors access
     for (neighbor_x, neighbor_y) in [
         (x.overflowing_sub(1).0, y),
         (x + 1, y),
@@ -65,7 +63,6 @@ fn step_self(x: usize, y: usize, sandbox: &mut Sandbox) -> bool {
 
         *health -= 1;
 
-        // Todo: create a function to replace
         if *health <= 0 {
             match temperature.replacement_on_critical.material {
                 Some(mat) => {
@@ -111,37 +108,24 @@ fn explode(cx: usize, cy: usize, radius: i32, sandbox: &mut Sandbox) {
     }
 }
 
-fn try_ignite_burnable(x: usize, y: usize, sandbox: &mut Sandbox) {
+fn step_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
     let particle = sandbox.get_mut(x, y).unwrap();
 
     if let Some(burnable) = &mut particle.burnable {
-        let temp = particle.temperature.unwrap();
-        if burnable.burning || temp.current < burnable.burn_temperature {
-            return;
+        let mut temp = particle.temperature.unwrap();
+        if !burnable.burning && temp.current > burnable.burn_temperature {
+            burnable.burning = true;
+            particle.temperature_changer = Some(TemperatureChanger(2));
+            if particle.health < burnable.burn_ticks {
+                particle.health = burnable.burn_ticks;
+            }
+            particle.color = burnable.burn_color;
+        } else if burnable.burning && temp.current < burnable.burn_temperature {
+            burnable.burning = false;
+            particle.temperature_changer = None;
+            particle.color = burnable.cooled_color;
+            temp.current = temp.start_temperature;
         }
-
-        burnable.burning = true;
-        particle.temperature_changer = Some(TemperatureChanger(2));
-        if particle.health < burnable.burn_ticks {
-            particle.health = burnable.burn_ticks;
-        }
-        particle.color = burnable.burn_color;
-    }
-}
-
-fn try_extenquish_burning(x: usize, y: usize, sandbox: &mut Sandbox) {
-    let particle = sandbox.get_mut(x, y).unwrap();
-
-    if let Some(burnable) = &mut particle.burnable {
-        let temp = particle.temperature.unwrap();
-        if !burnable.burning || temp.current > burnable.burn_temperature {
-            return;
-        }
-
-        burnable.burning = false;
-        particle.temperature_changer = None;
-        particle.color = burnable.cooled_color;
-        particle.temperature.unwrap().current = particle.temperature.unwrap().start_temperature;
     }
 }
 
